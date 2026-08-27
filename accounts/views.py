@@ -12,7 +12,12 @@ def register(request):
         return redirect("home")
 
     if request.method == "POST":
+        print("POST DATA:", request.POST)
+
         form = RegistrationForm(request.POST)
+
+        print("FORM VALID:", form.is_valid())
+        print("FORM ERRORS:", form.errors)
 
         if form.is_valid():
             user = form.save()

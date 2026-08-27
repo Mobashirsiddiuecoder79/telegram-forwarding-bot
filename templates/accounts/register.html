@@ -38,7 +38,7 @@
                     {{ form.username }}
                     {% if form.username.errors %}
                         <div class="form-help">
-                            {{ form.username.errors|striptags }}
+                            <strong>Username already exists.</strong> Please choose another username.
                         </div>
                     {% endif %}
                 </div>

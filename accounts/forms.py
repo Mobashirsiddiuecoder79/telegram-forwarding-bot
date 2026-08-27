@@ -9,6 +9,19 @@ from .models import UserProfile
 
 class RegistrationForm(UserCreationForm):
 
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        if User.objects.filter(username__iexact=username).exists():
+            raise forms.ValidationError('This username is already taken. Please choose another username.')
+        return username
+
+    def clean_email(self):
+        email = self.cleaned_data['email'].strip().lower()
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError('An account with this Gmail address already exists. Please use another email address.')
+        return email
+
+
     full_name = forms.CharField(
         max_length=150,
         widget=forms.TextInput(attrs={
@@ -106,12 +119,14 @@ class RegistrationForm(UserCreationForm):
         if commit:
             user.save()
 
-            UserProfile.objects.create(
+            UserProfile.objects.update_or_create(
                 user=user,
-                full_name=self.cleaned_data["full_name"],
-                email=self.cleaned_data["email"],
-                phone_number=self.cleaned_data["phone_number"],
-                date_of_birth=self.cleaned_data["date_of_birth"],
+                defaults={
+                    "full_name": self.cleaned_data["full_name"],
+                    "email": self.cleaned_data["email"],
+                    "phone_number": self.cleaned_data["phone_number"],
+                    "date_of_birth": self.cleaned_data["date_of_birth"],
+                },
             )
 
         return user
