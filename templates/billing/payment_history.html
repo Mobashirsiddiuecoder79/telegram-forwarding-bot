@@ -1,0 +1,352 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Payment History | Telegram Forwarder</title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/style.css' %}"
+    >
+
+    <style>
+
+
+        .nav-logout-button {
+            border: 0;
+            background: transparent;
+            padding: 8px 12px;
+            color: #64748b;
+            font: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.18s ease;
+        }
+
+        .nav-logout-button:hover {
+            color: #dc2626;
+            background: #fef2f2;
+        }
+
+        .payment-page {
+            min-height: calc(100vh - 80px);
+            padding: 50px 0 70px;
+        }
+
+        .payment-header {
+            margin-bottom: 30px;
+        }
+
+        .payment-title {
+            font-size: 38px;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+
+        .payment-subtitle {
+            color: #64748b;
+            font-size: 16px;
+        }
+
+        .payment-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .payment-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .payment-table th,
+        .payment-table td {
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid #eef2f7;
+        }
+
+        .payment-table th {
+            background: #f8fafc;
+            color: #475569;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .payment-table td {
+            color: #334155;
+            font-size: 14px;
+        }
+
+        .status {
+            display: inline-flex;
+            padding: 5px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .status-paid {
+            color: #166534;
+            background: #dcfce7;
+        }
+
+        .status-created {
+            color: #92400e;
+            background: #fef3c7;
+        }
+
+        .status-failed,
+        .status-expired {
+            color: #991b1b;
+            background: #fee2e2;
+        }
+
+        .status-refunded {
+            color: #475569;
+            background: #e2e8f0;
+        }
+
+        .empty-state {
+            padding: 50px 20px;
+            text-align: center;
+            color: #64748b;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 25px;
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        @media (max-width: 700px) {
+
+            .payment-page {
+                padding: 30px 15px 50px;
+            }
+
+            .payment-card {
+                overflow-x: auto;
+            }
+
+            .payment-table {
+                min-width: 700px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<header class="navbar">
+
+    <div class="container navbar-inner">
+
+        <a href="/" class="logo">
+            <span class="logo-icon">T</span>
+            Telegram Forwarder
+        </a>
+
+        <nav class="nav-links">
+
+            <a href="/">Home</a>
+
+            <a href="{% url 'profile' %}">
+                Profile
+            </a>
+
+            <a href="{% url 'subscription_plans' %}">
+                Subscription
+            </a>
+
+            <form
+                method="post"
+                action="{% url 'logout' %}"
+                class="nav-logout-form"
+            >
+
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="nav-logout-button"
+                >
+                    Sign Out
+                </button>
+
+            </form>
+
+        </nav>
+
+    </div>
+
+</header>
+
+
+<main class="payment-page">
+
+    <div class="container">
+
+        <div class="payment-header">
+
+            <div class="payment-title">
+                Payment History
+            </div>
+
+            <div class="payment-subtitle">
+                View your Razorpay payment history and
+                subscription purchases.
+            </div>
+
+        </div>
+
+
+        <div class="payment-card">
+
+            {% if payments %}
+
+                <table class="payment-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Date</th>
+
+                            <th>Plan</th>
+
+                            <th>Amount</th>
+
+                            <th>Order ID</th>
+
+                            <th>Status</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for payment in payments %}
+
+                            <tr>
+
+                                <td>
+                                    {{ payment.created_at|date:"d M Y, H:i" }}
+                                </td>
+
+                                <td>
+
+                                    {% if payment.plan %}
+                                        {{ payment.plan.name }}
+                                    {% elif payment.subscription %}
+                                        {{ payment.subscription.plan.name }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+
+                                </td>
+
+                                <td>
+                                    ₹{{ payment.amount }}
+                                </td>
+
+                                <td>
+                                    {{ payment.razorpay_order_id }}
+                                </td>
+
+                                <td>
+
+                                    {% if payment.status == "paid" %}
+
+                                        <span class="status status-paid">
+                                            Paid
+                                        </span>
+
+                                    {% elif payment.status == "failed" %}
+
+                                        <span class="status status-failed">
+                                            Failed
+                                        </span>
+
+                                    {% elif payment.status == "created" %}
+
+                                        <span class="status status-created">
+                                            Pending
+                                        </span>
+
+                                    {% elif payment.status == "expired" %}
+
+                                        <span class="status status-expired">
+                                            Expired
+                                        </span>
+
+                                    {% elif payment.status == "refunded" %}
+
+                                        <span class="status status-refunded">
+                                            Refunded
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="status">
+                                            {{ payment.get_status_display }}
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            {% else %}
+
+                <div class="empty-state">
+                    No payment history yet.
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <a
+            href="{% url 'subscription_plans' %}"
+            class="back-link"
+        >
+            ← Back to Subscription
+        </a>
+
+    </div>
+
+</main>
+
+</body>
+
+</html>

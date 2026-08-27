@@ -1,0 +1,1166 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Subscription Plans | Telegram Forwarder</title>
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, -apple-system, BlinkMacSystemFont,
+                         "Segoe UI", sans-serif;
+            color: #111827;
+            background: #f7faff;
+        }
+
+        .page {
+            min-height: 100vh;
+            background:
+                radial-gradient(
+                    circle at 90% 10%,
+                    rgba(37, 99, 235, 0.10),
+                    transparent 35%
+                ),
+                linear-gradient(
+                    180deg,
+                    #ffffff 0%,
+                    #f5f8ff 100%
+                );
+        }
+
+        /* =========================
+           NAVBAR
+        ========================= */
+
+        .navbar {
+            height: 68px;
+            background: rgba(255,255,255,0.96);
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .navbar-inner {
+            max-width: 1110px;
+            height: 100%;
+            margin: auto;
+            padding: 0 20px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+
+            text-decoration: none;
+            color: #2563eb;
+            font-size: 20px;
+            font-weight: 750;
+        }
+
+        .brand-icon {
+            width: 38px;
+            height: 38px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 10px;
+
+            color: white;
+            font-weight: 800;
+            font-size: 18px;
+
+            background: linear-gradient(
+                135deg,
+                #3b82f6,
+                #2563eb
+            );
+
+            box-shadow:
+                0 8px 18px rgba(37, 99, 235, 0.20);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+        }
+
+        .nav-links a,
+        .nav-logout-button {
+            border: 0;
+            background: none;
+
+            color: #475569;
+            text-decoration: none;
+
+            font-size: 14px;
+            font-weight: 650;
+
+            cursor: pointer;
+        }
+
+        .nav-links a:hover,
+        .nav-logout-button:hover {
+            color: #2563eb;
+        }
+
+        .nav-links .active {
+            color: #2563eb;
+
+            background: #eff6ff;
+            padding: 9px 14px;
+            border-radius: 9px;
+        }
+
+        .nav-logout-form {
+            margin: 0;
+        }
+
+
+        /* =========================
+           MAIN
+        ========================= */
+
+        .plans-main {
+            max-width: 1110px;
+            margin: auto;
+            padding: 70px 20px 90px;
+        }
+
+        .plans-header {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 45px;
+        }
+
+        .plans-badge {
+            display: inline-block;
+
+            padding: 7px 13px;
+            margin-bottom: 18px;
+
+            border-radius: 999px;
+
+            color: #2563eb;
+            background: #eff6ff;
+
+            font-size: 12px;
+            font-weight: 750;
+            letter-spacing: 0.5px;
+        }
+
+        .plans-header h1 {
+            margin: 0 0 14px;
+
+            font-size: clamp(36px, 5vw, 54px);
+            line-height: 1.05;
+            letter-spacing: -2px;
+        }
+
+        .plans-header p {
+            margin: 0;
+
+            color: #64748b;
+            font-size: 17px;
+            line-height: 1.7;
+        }
+
+
+        /* =========================
+           CURRENT PLAN
+        ========================= */
+
+        .current-plan {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            margin-bottom: 30px;
+            padding: 20px 24px;
+
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+
+            box-shadow:
+                0 10px 30px rgba(15, 23, 42, 0.05);
+        }
+
+        .current-label {
+            display: block;
+
+            margin-bottom: 5px;
+
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
+        .current-plan strong {
+            font-size: 19px;
+        }
+
+        .current-usage {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+
+        /* =========================
+           PLANS
+        ========================= */
+
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            align-items: stretch;
+        }
+
+        .plan-card {
+            position: relative;
+
+            display: flex;
+            flex-direction: column;
+
+            padding: 28px 24px 24px;
+
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+
+            box-shadow:
+                0 12px 30px rgba(15, 23, 42, 0.06);
+
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease,
+                border-color 0.2s ease;
+        }
+
+        .plan-card:hover {
+            transform: translateY(-5px);
+
+            box-shadow:
+                0 20px 45px rgba(15, 23, 42, 0.10);
+
+            border-color: #bfdbfe;
+        }
+
+        .plan-card.featured {
+            border: 2px solid #2563eb;
+            padding: 27px 23px 23px;
+        }
+
+        .popular {
+            position: absolute;
+            top: -13px;
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            padding: 5px 12px;
+
+            border-radius: 999px;
+
+            background: #2563eb;
+            color: white;
+
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+
+            white-space: nowrap;
+        }
+
+                .best-value {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: #111827;
+            color: white;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .5px;
+        }
+
+.plan-label {
+            color: #64748b;
+
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .plan-card h2 {
+            margin: 8px 0 12px;
+
+            font-size: 23px;
+        }
+
+        .price {
+            display: flex;
+            align-items: baseline;
+            gap: 2px;
+
+            color: #111827;
+
+            font-size: 42px;
+            font-weight: 800;
+            letter-spacing: -1.5px;
+        }
+
+        .price span {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .plan-duration {
+            margin-top: 2px;
+
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .plan-details {
+            margin-top: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .plan-details div {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .plan-details strong {
+            color: #334155;
+        }
+
+        .plan-details span {
+            text-align: right;
+        }
+
+        .daily-limit {
+            margin: 25px 0 20px;
+            padding: 16px;
+
+            background: #f8fafc;
+            border-radius: 12px;
+        }
+
+        .daily-limit strong {
+            display: block;
+
+            color: #2563eb;
+            font-size: 27px;
+        }
+
+        .daily-limit span {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .plan-features {
+            list-style: none;
+
+            padding: 0;
+            margin: 0 0 25px;
+
+            flex: 1;
+        }
+
+        .plan-features li {
+            padding: 7px 0;
+
+            color: #475569;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        /* =========================
+   PLAN BUTTON STATES
+========================= */
+
+.plan-button.current-plan-button {
+    background: #e8f0ff;
+    color: #2563eb;
+    border: 1px solid #b8cdfc;
+    box-shadow: none;
+    cursor: default;
+}
+
+.plan-button.current-plan-button:hover {
+    background: #e8f0ff;
+    transform: none;
+}
+
+.plan-button.free-plan-button {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    cursor: default;
+    box-shadow: none;
+}
+
+.plan-button.free-plan-button:hover {
+    background: #f1f5f9;
+    transform: none;
+}
+
+.plan-button.upgrade-plan-button {
+    background: #2563eb;
+    color: white;
+    border: 1px solid #2563eb;
+}
+
+.plan-button.upgrade-plan-button:hover {
+    background: #1d4ed8;
+}
+
+.plan-button {
+            width: 100%;
+
+            border: 0;
+            border-radius: 10px;
+
+            padding: 12px 16px;
+
+            background: #2563eb;
+            color: white;
+
+            font-size: 14px;
+            font-weight: 750;
+
+            cursor: pointer;
+
+            transition:
+                background 0.2s ease,
+                transform 0.2s ease;
+        }
+
+        .plan-button:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        .plan-button.free {
+            color: #475569;
+            background: #f1f5f9;
+            cursor: default;
+        }
+
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        .footer {
+            max-width: 1110px;
+            margin: auto;
+            padding: 22px 20px;
+
+            border-top: 1px solid #e5e7eb;
+
+            display: flex;
+            justify-content: space-between;
+
+            color: #64748b;
+            font-size: 13px;
+        }
+
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (max-width: 950px) {
+            .plans-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 650px) {
+            .nav-links {
+                gap: 12px;
+            }
+
+            .nav-links a,
+            .nav-logout-button {
+                font-size: 12px;
+            }
+
+            .brand {
+                font-size: 16px;
+            }
+
+            .brand-icon {
+                width: 34px;
+                height: 34px;
+            }
+
+            .plans-main {
+                padding-top: 45px;
+            }
+
+            .current-plan {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .plans-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    
+/* =========================================
+   PAYMENT HISTORY LINK
+========================================= */
+
+.payment-history-link {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto 24px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.payment-history-link a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    color: #2563eb;
+    background: #eff6ff;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.payment-history-link a:hover {
+    background: #dbeafe;
+    transform: translateX(2px);
+}
+
+.payment-history-link a span {
+    font-size: 17px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="page">
+
+    <!-- NAVBAR -->
+
+    <header class="navbar">
+        <div class="navbar-inner">
+
+            <a href="/" class="brand">
+                <span class="brand-icon">T</span>
+                Telegram Forwarder
+            </a>
+
+            <nav class="nav-links">
+
+                <a href="/">
+                    Home
+                </a>
+
+                {% if user.is_authenticated %}
+
+                    <a href="{% url 'profile' %}">
+                        My Profile
+                    </a>
+
+                    <a href="{% url 'subscription_plans' %}" class="active">
+                        Subscription
+                    </a>
+
+            <a href="{% url 'payment_history' %}">
+                Payment History
+            </a>
+
+
+
+                    <form
+                        method="post"
+                        action="{% url 'logout' %}"
+                        class="nav-logout-form"
+                    >
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="nav-logout-button"
+                        >
+                            Sign Out
+                        </button>
+                    </form>
+
+                {% endif %}
+
+            </nav>
+
+        </div>
+    </header>
+
+
+    <!-- MAIN -->
+
+    
+<div class="payment-history-link">
+    
+</div>
+
+<main class="plans-main">
+
+        <section class="plans-header">
+
+            <span class="plans-badge">
+                SUBSCRIPTION PLANS
+            </span>
+
+            <h1>
+                Choose the right plan.
+            </h1>
+
+            <p>
+                Forward more Telegram messages with higher
+                daily limits, more channels, and additional devices.
+            </p>
+
+        </section>
+
+
+        <!-- CURRENT PLAN -->
+
+        <section class="current-plan">
+
+            <div>
+                <span class="current-label">
+                    Current Plan
+                </span>
+
+                <strong>
+                    {% if current_subscription %}
+                        {{ current_subscription.plan.name }}
+                    {% else %}
+                        Free
+                    {% endif %}
+                </strong>
+
+                {% if current_subscription %}
+                    <div style="margin-top: 5px; color: #64748b; font-size: 13px;">
+                        Active until {{ current_subscription.expires_at|date:"M d, Y" }}
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if quota %}
+                <div class="current-usage">
+                    {{ quota.used }} /
+                    {{ quota.limit }}
+                    messages used today
+                </div>
+            {% endif %}
+
+        </section>
+
+
+        <!-- PLANS -->
+
+        <section class="plans-grid">
+
+            <!-- FREE -->
+
+            <article class="plan-card">
+
+                <span class="plan-label">
+                    FREE
+                </span>
+
+                <h2>
+                    Free
+                </h2>
+
+                <div class="price">
+                    <span>₹</span>0
+                </div>
+
+                <div class="plan-duration">
+                    No payment required
+                </div>
+
+                <div class="daily-limit">
+                    <strong>10</strong>
+                    <span>lifetime forwards</span>
+                </div>
+
+                <ul class="plan-features">
+                    <li>✓ 1 source channel</li>
+                    <li>✓ 1 destination channel</li>
+                    <li>✓ 1 device</li>
+                    <li>✓ Basic forwarding</li>
+                </ul>
+
+                <button
+                    type="button"
+                    class="plan-button free"
+                    disabled
+                >
+                    Free
+                </button>
+
+            </article>
+
+
+            <!-- PAID PLANS -->
+
+            {% for plan in plans %}
+
+            <article
+                class="plan-card
+                {% if plan.slug == 'plan-2' %}featured{% endif %}"
+            >
+
+                {% if plan.slug == 'plan-2' %}
+                    <span class="popular">
+                        MOST POPULAR
+                    </span>
+                {% endif %}
+
+                <span class="plan-label">
+                    {{ plan.name|upper }}
+                    {% if plan.slug == "plan-3" %}
+                        <span class="best-value">⭐ BEST VALUE</span>
+                    {% endif %}
+                </span>
+
+                <h2>
+                    {{ plan.name }}
+                </h2>
+
+                <div class="price">
+                    <span>₹</span>{{ plan.price|floatformat:0 }}
+                </div>
+
+                <div class="plan-duration">
+                    {{ plan.duration_days }} days
+                </div>
+
+                <div class="daily-limit">
+                    <strong>
+                        {{ plan.max_daily_forwards }}
+                    </strong>
+
+                    <span>
+                        messages per day
+                    </span>
+                </div>
+
+                <div class="plan-details">
+                    <div>
+                        <strong>Monthly forwarding</strong>
+                        <span>
+                            {{ plan.max_daily_forwards|add:"0" }} × {{ plan.duration_days }}
+                            =
+                            {% if plan.slug == "plan-1" %}1,500
+                            {% elif plan.slug == "plan-2" %}6,000
+                            {% elif plan.slug == "plan-3" %}15,000
+                            {% endif %} messages
+                        </span>
+                    </div>
+
+                    <div>
+                        <strong>Cost / message</strong>
+                        <span>
+                            {% if plan.slug == "plan-1" %}₹0.0327
+                            {% elif plan.slug == "plan-2" %}₹0.0248
+                            {% elif plan.slug == "plan-3" %}₹0.0199
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <ul class="plan-features">
+
+                    <li>
+                        ✓ {{ plan.max_sources }}
+                        source
+                        {% if plan.max_sources != 1 %}
+                            channels
+                        {% else %}
+                            channel
+                        {% endif %}
+                    </li>
+
+                    <li>
+                        ✓ {{ plan.max_destinations }}
+                        destination
+                        {% if plan.max_destinations != 1 %}
+                            channels
+                        {% else %}
+                            channel
+                        {% endif %}
+                    </li>
+
+                    <li>
+                        ✓ {{ plan.max_devices }}
+                        device
+                        {% if plan.max_devices != 1 %}
+                            devices
+                        {% endif %}
+                    </li>
+
+                    <li>
+                        ✓ Daily forwarding quota
+                    </li>
+
+                    <li>
+                        ✓ Subscription access
+                    </li>
+
+                </ul>
+
+                {% if current_subscription and current_subscription.plan_id == plan.id %}
+                    <button
+                        type="button"
+                        class="plan-button current-plan-button"
+                        disabled
+                    >
+                        ✓ Current Plan
+                    </button>
+                {% else %}
+                    <button
+                        type="button"
+                        class="plan-button upgrade-plan-button"
+                        data-plan-id="{{ plan.id }}"
+                        data-plan-name="{{ plan.name }}"
+                        onclick="startPayment(this)"
+                    >
+                        Upgrade
+                    </button>
+                {% endif %}
+
+            </article>
+
+            {% endfor %}
+
+        </section>
+
+    </main>
+
+
+    <!-- FOOTER -->
+
+    <footer class="footer">
+
+        <span>
+            © 2026 Telegram Forwarder
+        </span>
+
+        <span>
+            Built with Django &amp; Telethon
+        </span>
+
+    </footer>
+
+</div>
+
+</body>
+</html>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+function getCSRFToken() {
+    const name = "csrftoken=";
+    const cookies = document.cookie.split(";");
+
+    for (let cookie of cookies) {
+        cookie = cookie.trim();
+
+        if (cookie.startsWith(name)) {
+            return decodeURIComponent(
+                cookie.substring(name.length)
+            );
+        }
+    }
+
+    return "";
+}
+
+
+async function startPayment(button) {
+    const planId = button.dataset.planId;
+    const planName = button.dataset.planName;
+
+    if (!planId) {
+        alert("Invalid subscription plan.");
+        return;
+    }
+
+    button.disabled = true;
+    const originalText = button.innerText;
+    button.innerText = "Processing...";
+
+    try {
+        /*
+         * STEP 1
+         * Ask Django to create a Razorpay order.
+         */
+        const orderResponse = await fetch(
+            `/billing/create-order/${planId}/`,
+            {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCSRFToken(),
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            }
+        );
+
+        const orderData = await orderResponse.json();
+
+        if (!orderResponse.ok) {
+            throw new Error(
+                orderData.error || "Unable to create payment order."
+            );
+        }
+
+
+        /*
+         * STEP 2
+         * Open Razorpay Checkout.
+         */
+        const options = {
+            key: orderData.key_id,
+
+            amount: orderData.amount,
+
+            currency: orderData.currency,
+
+            name: "Telegram Forwarder",
+
+            description: planName,
+
+            order_id: orderData.order_id,
+
+            handler: async function(response) {
+
+                /*
+                 * STEP 3
+                 * Send Razorpay's response to Django.
+                 *
+                 * Django will verify the signature using
+                 * RAZORPAY_KEY_SECRET.
+                 */
+                const formData = new FormData();
+
+                formData.append(
+                    "razorpay_order_id",
+                    response.razorpay_order_id
+                );
+
+                formData.append(
+                    "razorpay_payment_id",
+                    response.razorpay_payment_id
+                );
+
+                formData.append(
+                    "razorpay_signature",
+                    response.razorpay_signature
+                );
+
+                formData.append(
+                    "plan_id",
+                    planId
+                );
+
+
+                const verifyResponse = await fetch(
+                    "/billing/verify-payment/",
+                    {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": getCSRFToken(),
+                            "X-Requested-With": "XMLHttpRequest"
+                        },
+                        body: formData
+                    }
+                );
+
+
+                const verifyData =
+                    await verifyResponse.json();
+
+
+                if (!verifyResponse.ok) {
+                    throw new Error(
+                        verifyData.error ||
+                        "Payment verification failed."
+                    );
+                }
+
+
+                if (verifyData.success) {
+                    window.location.href =
+                        "{% url 'subscription_plans' %}";
+                }
+            },
+
+            modal: {
+                ondismiss: async function() {
+
+                    /*
+                     * User closed/cancelled Razorpay Checkout.
+                     * Tell Django so the Payment record does not
+                     * remain stuck as "created".
+                     */
+                    try {
+
+                        const cancelledFormData = new FormData();
+
+                        cancelledFormData.append(
+                            "razorpay_order_id",
+                            orderData.order_id
+                        );
+
+                        await fetch(
+                            "{% url 'payment_failed' %}",
+                            {
+                                method: "POST",
+                                headers: {
+                                    "X-CSRFToken": getCSRFToken(),
+                                    "X-Requested-With": "XMLHttpRequest"
+                                },
+                                body: cancelledFormData
+                            }
+                        );
+
+                    } catch (error) {
+
+                        console.error(
+                            "Unable to update cancelled payment:",
+                            error
+                        );
+
+                    }
+
+                    button.disabled = false;
+                    button.innerText = originalText;
+                }
+            },
+
+            theme: {
+                color: "#2563eb"
+            }
+        };
+
+
+        const razorpay = new Razorpay(options);
+
+        razorpay.on(
+            "payment.failed",
+            async function(response) {
+
+                console.error(
+                    "Razorpay payment failed:",
+                    response.error
+                );
+
+                /*
+                 * Tell Django that this order failed.
+                 * The order ID comes from the order we created,
+                 * not from user-controlled plan information.
+                 */
+                try {
+
+                    const failedFormData = new FormData();
+
+                    failedFormData.append(
+                        "razorpay_order_id",
+                        orderData.order_id
+                    );
+
+                    await fetch(
+                        "{% url 'payment_failed' %}",
+                        {
+                            method: "POST",
+                            headers: {
+                                "X-CSRFToken": getCSRFToken(),
+                                "X-Requested-With": "XMLHttpRequest"
+                            },
+                            body: failedFormData
+                        }
+                    );
+
+                } catch (error) {
+
+                    console.error(
+                        "Unable to update failed payment:",
+                        error
+                    );
+
+                }
+
+                alert(
+                    response.error.description ||
+                    "Payment failed. Please try again."
+                );
+
+                button.disabled = false;
+                button.innerText = originalText;
+            }
+        );
+
+
+        razorpay.open();
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            error.message ||
+            "Something went wrong while starting payment."
+        );
+
+        button.disabled = false;
+        button.innerText = originalText;
+    }
+}
+</script>

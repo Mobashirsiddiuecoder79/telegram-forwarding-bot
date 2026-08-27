@@ -1,0 +1,126 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account | Telegram Forwarder</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+<div class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+
+            <div class="auth-logo">T</div>
+
+            <h1 class="auth-title">Create Account</h1>
+
+            <p class="auth-description">
+                Create your account to manage Telegram forwarding,
+                subscriptions, licenses, and channels.
+            </p>
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-error">
+                    {{ form.non_field_errors|striptags }}
+                </div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <div class="form-help">
+                            {{ form.username.errors|striptags }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    {{ form.full_name }}
+                    {% if form.full_name.errors %}
+                        <div class="form-help">
+                            {{ form.full_name.errors|striptags }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <div class="form-help">
+                            {{ form.email.errors|striptags }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    {{ form.phone_number }}
+                    {% if form.phone_number.errors %}
+                        <div class="form-help">
+                            {{ form.phone_number.errors|striptags }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Date of Birth</label>
+                    {{ form.date_of_birth }}
+                    {% if form.date_of_birth.errors %}
+                        <div class="form-help">
+                            {{ form.date_of_birth.errors|striptags }}
+                        </div>
+                    {% endif %}
+                    <div class="form-hint">
+                        You must be between 13 and 100 years old.
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    {{ form.password1 }}
+                    {% if form.password1.errors %}
+                        <div class="form-help">
+                            {{ form.password1.errors|striptags }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Confirm Password</label>
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}
+                        <div class="form-help">
+                            {{ form.password2.errors|striptags }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    Create Account
+                </button>
+            </form>
+
+            <p style="margin-top: 22px; text-align: center; color: var(--text-muted); font-size: 14px;">
+                Already have an account?
+                <a href="/accounts/login/" style="color: var(--primary); font-weight: 700;">
+                    Login
+                </a>
+            </p>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

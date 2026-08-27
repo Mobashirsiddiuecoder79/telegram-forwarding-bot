@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Profile | Telegram Forwarder</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Helvetica,
+                Arial,
+                sans-serif;
+
+            color: #0f172a;
+
+            background:
+                radial-gradient(
+                    circle at 10% 0%,
+                    rgba(37, 99, 235, 0.12),
+                    transparent 32%
+                ),
+                radial-gradient(
+                    circle at 95% 20%,
+                    rgba(59, 130, 246, 0.08),
+                    transparent 30%
+                ),
+                #f7f9fc;
+        }
+
+        .page {
+            width: 100%;
+            min-height: 100vh;
+            padding: 55px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1050px;
+            margin: auto;
+        }
+
+        /* =========================
+           HEADER
+        ========================= */
+
+        .profile-header {
+            position: relative;
+            overflow: hidden;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 25px;
+
+            padding: 30px 34px;
+
+            background: rgba(255,255,255,.96);
+
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+
+            box-shadow:
+                0 20px 55px rgba(15,23,42,.07);
+
+            margin-bottom: 22px;
+        }
+
+        .profile-header::after {
+            content: "";
+
+            position: absolute;
+
+            width: 190px;
+            height: 190px;
+
+            right: -65px;
+            top: -95px;
+
+            border-radius: 50%;
+
+            background: rgba(37,99,235,.07);
+        }
+
+        .identity {
+            position: relative;
+            z-index: 1;
+
+            display: flex;
+            align-items: center;
+
+            gap: 18px;
+        }
+
+        .avatar {
+            width: 68px;
+            height: 68px;
+
+            flex-shrink: 0;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 19px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #2563eb,
+                    #3b82f6
+                );
+
+            color: white;
+
+            font-size: 28px;
+            font-weight: 800;
+
+            box-shadow:
+                0 12px 28px rgba(37,99,235,.28);
+        }
+
+        .title {
+            font-size: 30px;
+            font-weight: 800;
+
+            letter-spacing: -0.8px;
+        }
+
+        .subtitle {
+            margin-top: 5px;
+
+            color: #64748b;
+
+            font-size: 14px;
+        }
+
+        .email {
+            color: #2563eb;
+            font-weight: 700;
+        }
+
+        .status {
+            position: relative;
+            z-index: 2;
+
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+
+            padding: 9px 14px;
+
+            border-radius: 999px;
+
+            color: #15803d;
+
+            background: #f0fdf4;
+
+            border: 1px solid #bbf7d0;
+
+            font-size: 13px;
+            font-weight: 700;
+
+            white-space: nowrap;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+
+            border-radius: 50%;
+
+            background: #22c55e;
+
+            box-shadow:
+                0 0 0 4px rgba(34,197,94,.10);
+        }
+
+        /* =========================
+           GRID
+        ========================= */
+
+        .grid {
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 22px;
+
+            margin-bottom: 22px;
+        }
+
+        .card {
+            background: rgba(255,255,255,.96);
+
+            border: 1px solid #e2e8f0;
+
+            border-radius: 22px;
+
+            padding: 28px;
+
+            box-shadow:
+                0 18px 45px rgba(15,23,42,.06);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+
+            gap: 13px;
+
+            margin-bottom: 24px;
+        }
+
+        .card-icon {
+            width: 42px;
+            height: 42px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 12px;
+
+            background: #eff6ff;
+
+            color: #2563eb;
+
+            font-size: 18px;
+        }
+
+        .card-title {
+            font-size: 17px;
+            font-weight: 750;
+        }
+
+        .card-description {
+            margin-top: 3px;
+
+            color: #94a3b8;
+
+            font-size: 13px;
+        }
+
+        /* =========================
+           INFORMATION ROWS
+        ========================= */
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 20px;
+
+            padding: 15px 0;
+
+            border-bottom: 1px solid #eef2f7;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .info-row:first-child {
+            padding-top: 0;
+        }
+
+        .label {
+            color: #64748b;
+
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .value {
+            color: #0f172a;
+
+            font-size: 14px;
+            font-weight: 700;
+
+            text-align: right;
+
+            word-break: break-word;
+        }
+
+        /* =========================
+           SECURITY
+        ========================= */
+
+        .security-card {
+            margin-bottom: 22px;
+        }
+
+        .security-item {
+            display: flex;
+            align-items: center;
+
+            gap: 15px;
+
+            padding: 17px;
+
+            border: 1px solid #edf1f6;
+
+            border-radius: 15px;
+
+            background: #fafbfd;
+
+            margin-bottom: 11px;
+        }
+
+        .security-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .security-icon {
+            width: 42px;
+            height: 42px;
+
+            flex-shrink: 0;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 12px;
+
+            background: white;
+
+            border: 1px solid #e2e8f0;
+
+            font-size: 17px;
+        }
+
+        .security-content {
+            flex: 1;
+        }
+
+        .security-title {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .security-text {
+            margin-top: 3px;
+
+            color: #64748b;
+
+            font-size: 13px;
+
+            line-height: 1.5;
+        }
+
+        .secure-badge {
+            color: #15803d;
+
+            background: #f0fdf4;
+
+            border: 1px solid #bbf7d0;
+
+            border-radius: 999px;
+
+            padding: 6px 10px;
+
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* =========================
+           ACTIONS
+        ========================= */
+
+        .actions {
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 14px;
+        }
+
+        .button {
+            min-height: 54px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 13px;
+
+            text-decoration: none;
+
+            font-size: 14px;
+            font-weight: 750;
+
+            cursor: pointer;
+
+            transition:
+                transform .16s ease,
+                box-shadow .16s ease,
+                background .16s ease;
+        }
+
+        .button:hover {
+            transform: translateY(-1px);
+        }
+
+        .primary {
+            color: white;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #2563eb,
+                    #1d4ed8
+                );
+
+            box-shadow:
+                0 10px 25px rgba(37,99,235,.24);
+        }
+
+        .primary:hover {
+            box-shadow:
+                0 14px 30px rgba(37,99,235,.30);
+        }
+
+        .secondary {
+            color: #334155;
+
+            background: white;
+
+            border: 1px solid #dbe3ee;
+        }
+
+        .secondary:hover {
+            background: #f8fafc;
+        }
+
+        .logout-form {
+            margin-top: 14px;
+        }
+
+        .logout-button {
+            width: 100%;
+
+            min-height: 50px;
+
+            border-radius: 13px;
+
+            background: white;
+
+            border: 1px solid #fecaca;
+
+            color: #dc2626;
+
+            font-size: 14px;
+            font-weight: 750;
+
+            cursor: pointer;
+
+            transition: all .16s ease;
+        }
+
+        .logout-button:hover {
+            background: #fef2f2;
+
+            border-color: #fca5a5;
+        }
+
+        .footer {
+            text-align: center;
+
+            margin-top: 24px;
+
+            color: #94a3b8;
+
+            font-size: 12px;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (max-width: 750px) {
+
+            .page {
+                padding: 25px 14px;
+            }
+
+            .profile-header {
+                padding: 24px;
+
+                align-items: flex-start;
+
+                flex-direction: column;
+            }
+
+            .status {
+                align-self: flex-start;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 23px;
+            }
+
+            .actions {
+                grid-template-columns: 1fr;
+            }
+
+            .title {
+                font-size: 25px;
+            }
+        }
+
+        @media (max-width: 450px) {
+
+            .identity {
+                align-items: flex-start;
+            }
+
+            .avatar {
+                width: 58px;
+                height: 58px;
+
+                font-size: 23px;
+            }
+
+            .info-row {
+                align-items: flex-start;
+
+                flex-direction: column;
+
+                gap: 5px;
+            }
+
+            .value {
+                text-align: left;
+            }
+
+            .security-item {
+                align-items: flex-start;
+            }
+
+            .secure-badge {
+                display: none;
+            }
+        }
+    </style>
+
+<style>
+.security-item {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+.security-item:hover {
+    border-color: #bfdbfe;
+    background: #f8fafc;
+    transform: translateY(-1px);
+}
+
+.security-arrow {
+    margin-left: 8px;
+    color: #2563eb;
+    font-size: 20px;
+    font-weight: 700;
+    transition: transform 0.2s ease;
+}
+
+.security-item:hover .security-arrow {
+    transform: translateX(4px);
+}
+</style>
+
+
+<style>
+    .security-link {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        color: inherit;
+        cursor: pointer;
+        transition: all 0.18s ease;
+    }
+
+    .security-link:hover {
+        border-color: #bfdbfe;
+        background: #f8fbff;
+        transform: translateY(-1px);
+    }
+
+    .security-link:hover .security-title {
+        color: #2563eb;
+    }
+</style>
+
+</head>
+
+<body>
+
+<div class="page">
+
+    <div class="container">
+
+        <!-- HEADER -->
+
+        <div class="profile-header">
+
+            <div class="identity">
+
+                <div class="avatar">
+                    {{ request.user.username|first|upper }}
+                </div>
+
+                <div>
+                    <div class="title">
+                        My Profile
+                    </div>
+
+                    <div class="subtitle">
+                        Manage your Telegram Forwarder account
+                        <span class="email">
+                            {{ request.user.email }}
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="status">
+                <span class="status-dot"></span>
+                Account Active
+            </div>
+
+        </div>
+
+
+        <!-- INFORMATION -->
+
+        <div class="grid">
+
+            <!-- PERSONAL -->
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div class="card-icon">
+                        👤
+                    </div>
+
+                    <div>
+                        <div class="card-title">
+                            Personal Information
+                        </div>
+
+                        <div class="card-description">
+                            Your personal details
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="info-row">
+                    <span class="label">
+                        Full Name
+                    </span>
+
+                    <span class="value">
+                        {{ profile.full_name|default:"Not provided" }}
+                    </span>
+                </div>
+
+
+                <div class="info-row">
+                    <span class="label">
+                        Date of Birth
+                    </span>
+
+                    <span class="value">
+                        {{ profile.date_of_birth|date:"d M Y"|default:"Not provided" }}
+                    </span>
+                </div>
+
+
+                <div class="info-row">
+                    <span class="label">
+                        Phone Number
+                    </span>
+
+                    <span class="value">
+                        {{ profile.phone_number|default:"Not provided" }}
+                    </span>
+                </div>
+
+            </div>
+
+
+            <!-- CONTACT -->
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div class="card-icon">
+                        ✉
+                    </div>
+
+                    <div>
+                        <div class="card-title">
+                            Contact Information
+                        </div>
+
+                        <div class="card-description">
+                            Your registered account details
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="info-row">
+                    <span class="label">
+                        Email
+                    </span>
+
+                    <span class="value">
+                        {{ request.user.email|default:"Not provided" }}
+                    </span>
+                </div>
+
+
+                <div class="info-row">
+                    <span class="label">
+                        Username
+                    </span>
+
+                    <span class="value">
+                        {{ request.user.username }}
+                    </span>
+                </div>
+
+
+                <div class="info-row">
+                    <span class="label">
+                        Member Since
+                    </span>
+
+                    <span class="value">
+                        {{ request.user.date_joined|date:"d M Y" }}
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SECURITY -->
+
+        <div class="card security-card">
+
+            <div class="card-header">
+
+                <div class="card-icon">
+                    🔒
+                </div>
+
+                <div>
+                    <div class="card-title">
+                        Account & Security
+                    </div>
+
+                    <div class="card-description">
+                        Your account access and security
+                    </div>
+                </div>
+
+            </div>
+
+
+            <a href="{% url 'password_change' %}" class="security-item">
+
+                <div class="security-icon">
+                    ✓
+                </div>
+
+                <div class="security-content">
+
+                    <div class="security-title">
+                        Password Protected
+                    </div>
+
+                    <div class="security-text">
+                        Change your account password securely.
+                    </div>
+
+                </div>
+
+                <div class="secure-badge">
+                    SECURE
+                </div>
+
+                <div class="security-arrow">
+                    →
+                </div>
+
+            </a>
+
+
+            <a
+                href="{% url 'password_reset' %}"
+                class="security-item security-link"
+            >
+
+                <div class="security-icon">
+                    ✉
+                </div>
+
+                <div class="security-content">
+
+                    <div class="security-title">
+                        Password Recovery
+                    </div>
+
+                    <div class="security-text">
+                        Password reset instructions can be sent to your
+                        registered email address.
+                    </div>
+
+                </div>
+
+                <div class="secure-badge">
+                    ENABLED
+                </div>
+
+            </a>
+
+        </div>
+
+
+        <!-- ACTIONS -->
+
+        <div class="actions">
+
+            <a
+                href="{% url 'home' %}"
+                class="button primary"
+            >
+                ← Back to Dashboard
+            </a>
+
+
+            <a
+                href="{% url 'profile_edit' %}"
+                class="button secondary"
+            >
+                ✎ Edit Profile
+            </a>
+
+        </div>
+
+
+        <form
+            method="post"
+            action="{% url 'logout' %}"
+            class="logout-form"
+        >
+
+            {% csrf_token %}
+
+            <button
+                type="submit"
+                class="logout-button"
+            >
+                Sign Out
+            </button>
+
+        </form>
+
+
+        <div class="footer">
+            Telegram Forwarder · Account Management
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

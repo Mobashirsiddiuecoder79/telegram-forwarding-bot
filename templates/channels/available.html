@@ -1,0 +1,74 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Your Telegram Channels</title>
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+<header class="navbar">
+    <div class="container navbar-inner">
+
+        <a href="/" class="logo">
+            <span class="logo-icon">T</span>
+            Telegram Forwarder
+        </a>
+
+        <nav class="nav-links">
+            <a href="/">Home</a>
+            <a href="{% url 'profile' %}">Profile</a>
+            <a href="{% url 'channel_management' %}">
+                Channels
+            </a>
+        </nav>
+
+    </div>
+</header>
+
+<main class="container" style="padding: 50px 0;">
+
+    <h1>Your Telegram Channels</h1>
+
+    {% if error %}
+
+        <p>{{ error }}</p>
+
+    {% elif channels %}
+
+        <ul>
+            {% for channel in channels %}
+                <li style="margin: 15px 0;">
+                    <strong>{{ channel.title }}</strong>
+
+                    {% if channel.username %}
+                        — @{{ channel.username }}
+                    {% endif %}
+
+                    <br>
+
+                    <small>
+                        Chat ID: {{ channel.chat_id }}
+                    </small>
+                </li>
+            {% endfor %}
+        </ul>
+
+    {% else %}
+
+        <p>
+            No accessible Telegram channels or groups were found.
+        </p>
+
+    {% endif %}
+
+</main>
+
+</body>
+</html>

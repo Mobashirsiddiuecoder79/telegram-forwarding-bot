@@ -1,0 +1,807 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Channel Management | Telegram Forwarder</title>
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <style>
+        .page {
+            min-height: calc(100vh - 80px);
+            padding: 50px 0 70px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 36px;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            color: #64748b;
+            font-size: 16px;
+        }
+
+        .back-link {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 18px;
+            box-shadow: 0 12px 35px rgba(15, 23, 42, 0.06);
+        }
+
+        .form-card {
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 21px;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 6px;
+        }
+
+        .section-subtitle {
+            color: #64748b;
+            margin-bottom: 25px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            font-weight: 700;
+            color: #334155;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 13px 15px;
+            border: 1px solid #dbe3ef;
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+            transition: 0.2s;
+            background: #fff;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 13px 15px;
+            border: 1px solid #dbe3ef;
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .hint {
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .form-actions {
+            margin-top: 25px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn-primary {
+            border: 0;
+            border-radius: 10px;
+            padding: 13px 24px;
+            background: #2563eb;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.20);
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .messages {
+            margin-bottom: 25px;
+        }
+
+        .message {
+            padding: 14px 16px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .message.success {
+            background: #ecfdf5;
+            color: #047857;
+            border: 1px solid #a7f3d0;
+        }
+
+        .message.error {
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .message.info {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+
+        .pairs-card {
+            padding: 30px;
+        }
+
+        .pairs-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+        }
+
+        .pair-count {
+            background: #eff6ff;
+            color: #2563eb;
+            padding: 6px 11px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .pair-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .pair {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr auto;
+            align-items: center;
+            gap: 18px;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            background: #fafcff;
+        }
+
+        .channel-label {
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 5px;
+        }
+
+        .channel-id {
+            color: #111827;
+            font-weight: 700;
+            word-break: break-word;
+        }
+
+        .channel-name {
+            color: #64748b;
+            font-size: 13px;
+            margin-top: 3px;
+        }
+
+        .arrow {
+            color: #2563eb;
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .pair-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status {
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .status.active {
+            color: #047857;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+        }
+
+        .status.inactive {
+            color: #64748b;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+        }
+
+        .action-btn {
+            border: 1px solid #dbe3ef;
+            background: #fff;
+            color: #334155;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .action-btn:hover {
+            border-color: #2563eb;
+            color: #2563eb;
+        }
+
+        .action-btn.delete:hover {
+            border-color: #ef4444;
+            color: #dc2626;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 50px 20px;
+            border: 1px dashed #cbd5e1;
+            border-radius: 14px;
+            color: #64748b;
+        }
+
+        .empty-icon {
+            font-size: 34px;
+            margin-bottom: 12px;
+        }
+
+        @media (max-width: 800px) {
+            .page {
+                padding: 30px 15px 50px;
+            }
+
+            .page-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full {
+                grid-column: auto;
+            }
+
+            .pair {
+                grid-template-columns: 1fr;
+            }
+
+            .arrow {
+                transform: rotate(90deg);
+            }
+
+            .pair-actions {
+                justify-content: flex-start;
+                flex-wrap: wrap;
+            }
+        }
+
+        /* =========================
+           PLAN LIMITS
+        ========================= */
+
+        .plan-limits {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .limit-card {
+            padding: 18px 20px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+        }
+
+        .limit-label {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+
+        .limit-value {
+            margin-top: 6px;
+            color: #111827;
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .limit-plan {
+            margin-top: 4px;
+            color: #2563eb;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        @media (max-width: 700px) {
+            .plan-limits {
+                grid-template-columns: 1fr;
+            }
+        }
+
+    .nav-logout-form {
+    display: inline;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-logout-button {
+    border: 0;
+    background: transparent;
+    padding: 8px 12px;
+    color: #64748b;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.18s ease;
+}
+
+.nav-logout-button:hover {
+    color: #dc2626;
+    background: #fef2f2;
+}
+
+</style>
+
+
+</head>
+
+<body>
+
+<header class="navbar">
+    <div class="container navbar-inner">
+
+        <a href="/" class="logo">
+            <span class="logo-icon">T</span>
+            Telegram Forwarder
+        </a>
+
+        <nav class="nav-links">
+            <a href="/">Home</a>
+            <a href="{% url 'profile' %}">Profile</a>
+            <a href="{% url 'subscription_plans' %}">Subscription</a>
+            <form
+                method="post"
+                action="{% url 'logout' %}"
+                class="nav-logout-form"
+            >
+                {% csrf_token %}
+                <button type="submit" class="nav-logout-button">
+                    Sign Out
+                </button>
+            </form>
+        </nav>
+
+    </div>
+</header>
+
+
+<main class="page">
+
+    <div class="container">
+
+        <div class="page-header">
+
+            <div>
+                <div class="page-title">
+                    Channel Management
+                </div>
+
+                <div class="page-subtitle">
+                    Configure the Telegram source and destination channels
+                    used for message forwarding.
+                </div>
+            </div>
+
+            <a href="{% url 'home' %}" class="back-link">
+                ← Back to Dashboard
+            </a>
+
+        </div>
+
+
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+
+        <!-- PLAN LIMITS -->
+
+        <section class="plan-limits">
+
+            <div class="limit-card">
+                <div class="limit-label">
+                    Source Channels
+                </div>
+
+                <div class="limit-value">
+                    {{ source_count }} / {{ max_sources }}
+                </div>
+
+                <div class="limit-plan">
+                    {% if current_plan %}
+                        {{ current_plan.name }}
+                    {% else %}
+                        Free
+                    {% endif %}
+                </div>
+            </div>
+
+
+            <div class="limit-card">
+                <div class="limit-label">
+                    Destination Channels
+                </div>
+
+                <div class="limit-value">
+                    {{ destination_count }} / {{ max_destinations }}
+                </div>
+
+                <div class="limit-plan">
+                    {% if current_plan %}
+                        {{ current_plan.name }}
+                    {% else %}
+                        Free
+                    {% endif %}
+                </div>
+            </div>
+
+
+            <div class="limit-card">
+                <div class="limit-label">
+                    Telegram Devices
+                </div>
+
+                <div class="limit-value">
+                    1 / {{ max_devices }}
+                </div>
+
+                <div class="limit-plan">
+                    {% if current_plan %}
+                        {{ current_plan.name }}
+                    {% else %}
+                        Free
+                    {% endif %}
+                </div>
+            </div>
+
+        </section>
+
+
+        <section class="card form-card">
+
+            <div class="section-title">
+                Add Channel Pair
+            </div>
+
+            <div class="section-subtitle">
+                Connect a source channel to a destination channel.
+            </div>
+
+            <form method="post" action="{% url 'add_selected_channel_pair' %}">
+
+                {% csrf_token %}
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+
+                        <label for="source_chat_id">
+                            Source Channel
+                        </label>
+
+                        <select
+                            id="source_chat_id"
+                            name="source_chat_id"
+                            required
+                        >
+                            <option value="">
+                                Select source channel
+                            </option>
+
+                            {% for channel in telegram_channels %}
+                                <option value="{{ channel.chat_id }}">
+                                    {{ channel.title }}
+                                    {% if channel.username %}
+                                        (@{{ channel.username }})
+                                    {% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+
+                        <span class="hint">
+                            Select a channel or group from your connected
+                            Telegram account.
+                        </span>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="destination_chat_id">
+                            Destination Channel
+                        </label>
+
+                        <select
+                            id="destination_chat_id"
+                            name="destination_chat_id"
+                            required
+                        >
+                            <option value="">
+                                Select destination channel
+                            </option>
+
+                            {% for channel in telegram_channels %}
+                                <option value="{{ channel.chat_id }}">
+                                    {{ channel.title }}
+                                    {% if channel.username %}
+                                        (@{{ channel.username }})
+                                    {% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+
+                        <span class="hint">
+                            Select the destination from your Telegram account.
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-actions">
+
+                    <button
+                        type="submit"
+                        class="btn-primary"
+                    >
+                        + Add Channel Pair
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+
+        <section class="card pairs-card">
+
+            <div class="pairs-header">
+
+                <div>
+                    <div class="section-title">
+                        Your Channel Pairs
+                    </div>
+
+                    <div class="section-subtitle">
+                        Manage the forwarding routes connected to your account.
+                    </div>
+                </div>
+
+                <div class="pair-count">
+                    {{ channel_pairs|length }} PAIR{{ channel_pairs|length|pluralize }}
+                </div>
+
+            </div>
+
+
+            {% if channel_pairs %}
+
+                <div class="pair-list">
+
+                    {% for pair in channel_pairs %}
+
+                        <div class="pair">
+
+                            <div>
+                                <div class="channel-label">
+                                    Source
+                                </div>
+
+                                <div class="channel-id">
+                                    {{ pair.source_chat_id }}
+                                </div>
+
+                                {% if pair.source_name %}
+                                    <div class="channel-name">
+                                        {{ pair.source_name }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+
+                            <div class="arrow">
+                                →
+                            </div>
+
+
+                            <div>
+                                <div class="channel-label">
+                                    Destination
+                                </div>
+
+                                <div class="channel-id">
+                                    {{ pair.destination_chat_id }}
+                                </div>
+
+                                {% if pair.destination_name %}
+                                    <div class="channel-name">
+                                        {{ pair.destination_name }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+
+                            <div class="pair-actions">
+
+                                {% if pair.is_active %}
+                                    <span class="status active">
+                                        ACTIVE
+                                    </span>
+                                {% else %}
+                                    <span class="status inactive">
+                                        INACTIVE
+                                    </span>
+                                {% endif %}
+
+
+                                <form
+                                    method="post"
+                                    action="{% url 'toggle_channel_pair' pair.pk %}"
+                                >
+                                    {% csrf_token %}
+
+                                    <button
+                                        type="submit"
+                                        class="action-btn"
+                                    >
+                                        {% if pair.is_active %}
+                                            Disable
+                                        {% else %}
+                                            Enable
+                                        {% endif %}
+                                    </button>
+                                </form>
+
+
+                                <form
+                                    method="post"
+                                    action="{% url 'delete_channel_pair' pair.pk %}"
+                                    onsubmit="return confirm('Remove this channel pair?');"
+                                >
+                                    {% csrf_token %}
+
+                                    <button
+                                        type="submit"
+                                        class="action-btn delete"
+                                    >
+                                        Delete
+                                    </button>
+                                </form>
+
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="empty">
+
+                    <div class="empty-icon">
+                        ↗
+                    </div>
+
+                    <strong>
+                        No channel pairs yet
+                    </strong>
+
+                    <p>
+                        Add your first source and destination channel
+                        above to configure forwarding.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </section>
+
+    </div>
+
+
+<div style="margin-top: 24px; text-align: center;">
+    <a href="{% url 'forwarding_dashboard' %}" class="btn btn-primary">
+        Go to Forwarding
+    </a>
+</div>
+
+</main>
+
+
+<footer class="footer">
+
+    <div class="container footer-inner">
+
+        <span>
+            © 2026 Telegram Forwarder
+        </span>
+
+        <span>
+            Channel Management
+        </span>
+
+    </div>
+
+</footer>
+
+</body>
+</html>

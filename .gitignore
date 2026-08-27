@@ -1,7 +1,42 @@
-.env
-venv/
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Django
+db.sqlite3
+db.sqlite3-journal
+
+# Telegram sessions
 *.session
 *.session-journal
+
+# IDE
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+# Backup files
+*.backup
+*.backup1
+*.backup2
+
+# Database files
 *.db
+*.sqlite3
+*.sqlite

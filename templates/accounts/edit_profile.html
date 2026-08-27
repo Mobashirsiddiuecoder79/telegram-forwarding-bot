@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Edit Profile | Telegram Forwarder</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                         Roboto, Helvetica, Arial, sans-serif;
+
+            background:
+                radial-gradient(circle at top left,
+                    rgba(37, 99, 235, 0.10),
+                    transparent 35%),
+                radial-gradient(circle at bottom right,
+                    rgba(59, 130, 246, 0.08),
+                    transparent 35%),
+                #f7f9fc;
+
+            color: #0f172a;
+        }
+
+        .page {
+            width: 100%;
+            min-height: 100vh;
+
+            display: flex;
+            justify-content: center;
+
+            padding: 70px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 720px;
+        }
+
+        .header {
+            background: rgba(255,255,255,.94);
+
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+
+            padding: 32px;
+
+            box-shadow:
+                0 20px 50px rgba(15,23,42,.08);
+
+            margin-bottom: 22px;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .icon {
+            width: 58px;
+            height: 58px;
+
+            border-radius: 17px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: linear-gradient(
+                135deg,
+                #2563eb,
+                #3b82f6
+            );
+
+            color: white;
+
+            font-size: 25px;
+            font-weight: 700;
+
+            box-shadow:
+                0 10px 25px rgba(37,99,235,.25);
+        }
+
+        h1 {
+            font-size: 30px;
+            line-height: 1.2;
+            letter-spacing: -0.7px;
+        }
+
+        .subtitle {
+            margin-top: 6px;
+            color: #64748b;
+            font-size: 15px;
+        }
+
+        .card {
+            background: rgba(255,255,255,.96);
+
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+
+            padding: 32px;
+
+            box-shadow:
+                0 20px 50px rgba(15,23,42,.08);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+
+            margin-bottom: 24px;
+        }
+
+        .field {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+
+            margin-bottom: 8px;
+
+            font-size: 14px;
+            font-weight: 650;
+
+            color: #334155;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+
+            min-height: 50px;
+
+            padding: 12px 14px;
+
+            border: 1px solid #dbe3ee;
+            border-radius: 12px;
+
+            background: #fff;
+
+            color: #0f172a;
+
+            font-size: 15px;
+
+            outline: none;
+
+            transition:
+                border-color .18s ease,
+                box-shadow .18s ease,
+                background .18s ease;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #2563eb;
+
+            box-shadow:
+                0 0 0 4px rgba(37,99,235,.10);
+        }
+
+        .help {
+            margin-top: 7px;
+
+            color: #64748b;
+
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .error {
+            margin-top: 7px;
+
+            color: #dc2626;
+
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .form-error {
+            margin-bottom: 22px;
+
+            padding: 14px 16px;
+
+            border-radius: 12px;
+
+            background: #fef2f2;
+
+            border: 1px solid #fecaca;
+
+            color: #b91c1c;
+
+            font-size: 14px;
+        }
+
+        .actions {
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 14px;
+
+            margin-top: 28px;
+        }
+
+        .button {
+            min-height: 52px;
+
+            border-radius: 12px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            text-decoration: none;
+
+            font-size: 15px;
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition:
+                transform .15s ease,
+                box-shadow .15s ease,
+                background .15s ease;
+        }
+
+        .button:hover {
+            transform: translateY(-1px);
+        }
+
+        .primary {
+            border: none;
+
+            color: white;
+
+            background: linear-gradient(
+                135deg,
+                #2563eb,
+                #1d4ed8
+            );
+
+            box-shadow:
+                0 10px 22px rgba(37,99,235,.25);
+        }
+
+        .primary:hover {
+            box-shadow:
+                0 14px 28px rgba(37,99,235,.32);
+        }
+
+        .secondary {
+            border: 1px solid #dbe3ee;
+
+            color: #334155;
+
+            background: #f8fafc;
+        }
+
+        .secondary:hover {
+            background: #f1f5f9;
+        }
+
+        .back {
+            display: block;
+
+            text-align: center;
+
+            margin-top: 20px;
+
+            color: #2563eb;
+
+            text-decoration: none;
+
+            font-size: 14px;
+
+            font-weight: 600;
+        }
+
+        @media (max-width: 600px) {
+
+            .page {
+                padding: 30px 14px;
+            }
+
+            .header,
+            .card {
+                padding: 22px;
+
+                border-radius: 18px;
+            }
+
+            .header-top {
+                align-items: flex-start;
+            }
+
+            h1 {
+                font-size: 25px;
+            }
+
+            .actions {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="page">
+
+    <div class="container">
+
+        <div class="header">
+
+            <div class="header-top">
+
+                <div class="icon">
+                    ✎
+                </div>
+
+                <div>
+                    <h1>Edit Profile</h1>
+
+                    <p class="subtitle">
+                        Update your Telegram Forwarder account information.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="section-title">
+                Account Information
+            </div>
+
+
+            {% if form.non_field_errors %}
+
+                <div class="form-error">
+                    {{ form.non_field_errors }}
+                </div>
+
+            {% endif %}
+
+
+            <form method="post">
+
+                {% csrf_token %}
+
+
+                {% for field in form %}
+
+                    <div class="field">
+
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                        </label>
+
+
+                        {{ field }}
+
+
+                        {% if field.help_text %}
+
+                            <div class="help">
+                                {{ field.help_text }}
+                            </div>
+
+                        {% endif %}
+
+
+                        {% for error in field.errors %}
+
+                            <div class="error">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% endfor %}
+
+
+                <div class="actions">
+
+                    <button
+                        type="submit"
+                        class="button primary"
+                    >
+                        Save Changes
+                    </button>
+
+
+                    <a
+                        href="{% url 'profile' %}"
+                        class="button secondary"
+                    >
+                        Cancel
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+
+        <a
+            href="{% url 'profile' %}"
+            class="back"
+        >
+            ← Back to Profile
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>

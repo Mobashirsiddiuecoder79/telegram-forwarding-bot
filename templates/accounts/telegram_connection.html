@@ -1,0 +1,547 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Telegram Connection | Telegram Forwarder</title>
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <style>
+        .telegram-page {
+            min-height: calc(100vh - 80px);
+            padding: 50px 0 70px;
+        }
+
+        .telegram-header {
+            margin-bottom: 30px;
+        }
+
+        .telegram-title {
+            font-size: 36px;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+
+        .telegram-subtitle {
+            color: #64748b;
+            font-size: 16px;
+            max-width: 700px;
+        }
+
+        .telegram-card {
+            max-width: 700px;
+            padding: 32px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 18px;
+            box-shadow: 0 12px 35px rgba(15, 23, 42, 0.06);
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 22px;
+        }
+
+        .status.connected {
+            color: #047857;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+        }
+
+        .status.disconnected {
+            color: #64748b;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .account-box {
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            background: #f8fafc;
+            margin-bottom: 25px;
+        }
+
+        .account-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 11px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .account-row:last-child {
+            border-bottom: 0;
+        }
+
+        .account-label {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .account-value {
+            color: #111827;
+            font-weight: 700;
+            text-align: right;
+        }
+
+        .form-title {
+            font-size: 21px;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 7px;
+        }
+
+        .form-description {
+            color: #64748b;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #334155;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 13px 15px;
+            border: 1px solid #dbe3ef;
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+            background: #fff;
+        }
+
+        .form-group input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+        }
+
+        .btn-primary {
+            width: 100%;
+            border: 0;
+            border-radius: 10px;
+            padding: 14px 20px;
+            background: #2563eb;
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .messages {
+            max-width: 700px;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            padding: 13px 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .message.success {
+            background: #ecfdf5;
+            color: #047857;
+            border: 1px solid #a7f3d0;
+        }
+
+        .message.error {
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .message.info {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+
+        .security-note {
+            margin-top: 25px;
+            padding: 15px;
+            border: 1px solid #dbeafe;
+            border-radius: 12px;
+            background: #eff6ff;
+            color: #1e40af;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 25px;
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        @media (max-width: 700px) {
+            .telegram-page {
+                padding: 30px 15px 50px;
+            }
+
+            .telegram-title {
+                font-size: 30px;
+            }
+
+            .telegram-card {
+                padding: 24px;
+            }
+
+            .account-row {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .account-value {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="navbar">
+    <div class="container navbar-inner">
+
+        <a href="/" class="logo">
+            <span class="logo-icon">T</span>
+            Telegram Forwarder
+        </a>
+
+        <nav class="nav-links">
+            <a href="/">Home</a>
+            <a href="{% url 'home' %}">Profile</a>
+            <a href="{% url 'channel_management' %}">Channels</a>
+        </nav>
+
+    </div>
+</header>
+
+
+<main class="telegram-page">
+
+    <div class="container">
+
+        <div class="telegram-header">
+
+            <div class="telegram-title">
+                Telegram Connection
+            </div>
+
+            <div class="telegram-subtitle">
+                Connect your own Telegram account to enable message
+                forwarding. Your Telegram authorization is private to
+                your account.
+            </div>
+
+        </div>
+
+
+        {% if messages %}
+
+            <div class="messages">
+
+                {% for message in messages %}
+
+                    <div class="message {{ message.tags }}">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+
+        <section class="telegram-card">
+
+            {% if connection.is_connected %}
+
+                <div class="status connected">
+                    <span class="status-dot"></span>
+                    TELEGRAM CONNECTED
+                </div>
+
+                <div class="account-box">
+
+                    <div class="account-row">
+                        <span class="account-label">
+                            Name
+                        </span>
+
+                        <span class="account-value">
+                            {{ connection.first_name }}
+                            {{ connection.last_name }}
+                        </span>
+                    </div>
+
+
+                    <div class="account-row">
+                        <span class="account-label">
+                            Username
+                        </span>
+
+                        <span class="account-value">
+                            {% if connection.telegram_username %}
+                                @{{ connection.telegram_username }}
+                            {% else %}
+                                Not set
+                            {% endif %}
+                        </span>
+                    </div>
+
+
+                    <div class="account-row">
+                        <span class="account-label">
+                            Phone
+                        </span>
+
+                        <span class="account-value">
+                            {{ connection.phone_number }}
+                        </span>
+                    </div>
+
+
+                    <div class="account-row">
+                        <span class="account-label">
+                            Telegram ID
+                        </span>
+
+                        <span class="account-value">
+                            {{ connection.telegram_user_id }}
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <div class="security-note">
+                    Your Telegram session is encrypted and stored
+                    privately for your account. It is never displayed
+                    on this page.
+                </div>
+
+                <form
+                    method="post"
+                    action="{% url 'telegram_disconnect' %}"
+                    style="margin-top: 20px;"
+                    onsubmit="return confirm('Disconnect your Telegram account?');"
+                >
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        style="
+                            width: 100%;
+                            padding: 13px 20px;
+                            border: 1px solid #fecaca;
+                            border-radius: 10px;
+                            background: #fef2f2;
+                            color: #b91c1c;
+                            font-weight: 700;
+                            cursor: pointer;
+                        "
+                    >
+                        Disconnect Telegram
+                    </button>
+                </form>
+
+
+            {% elif pending_2fa %}
+
+                <div class="status disconnected">
+                    <span class="status-dot"></span>
+                    TWO-STEP VERIFICATION REQUIRED
+                </div>
+
+                <div class="form-title">
+                    Enter Telegram 2FA Password
+                </div>
+
+                <div class="form-description">
+                    Your Telegram account has two-step verification
+                    enabled. Enter your Telegram 2FA password to finish
+                    connecting your account.
+                </div>
+
+                <form
+                    method="post"
+                    action="{% url 'telegram_verify_2fa' %}"
+                >
+
+                    {% csrf_token %}
+
+                    <div class="form-group">
+
+                        {{ two_fa_form.password.label_tag }}
+
+                        {{ two_fa_form.password }}
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="btn-primary"
+                    >
+                        Verify & Connect
+                    </button>
+
+                </form>
+
+
+            {% elif pending_code %}
+
+                <div class="status disconnected">
+                    <span class="status-dot"></span>
+                    VERIFICATION CODE SENT
+                </div>
+
+                <div class="form-title">
+                    Enter Telegram Code
+                </div>
+
+                <div class="form-description">
+                    Enter the verification code sent by Telegram
+                    to your account.
+                </div>
+
+                <form
+                    method="post"
+                    action="{% url 'telegram_verify_code' %}"
+                >
+
+                    {% csrf_token %}
+
+                    <div class="form-group">
+
+                        {{ code_form.code.label_tag }}
+
+                        {{ code_form.code }}
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="btn-primary"
+                    >
+                        Verify Telegram Account
+                    </button>
+
+                </form>
+
+
+            {% else %}
+
+                <div class="status disconnected">
+                    <span class="status-dot"></span>
+                    NOT CONNECTED
+                </div>
+
+                <div class="form-title">
+                    Connect Telegram
+                </div>
+
+                <div class="form-description">
+                    Enter the phone number associated with your
+                    Telegram account. Telegram will send you a
+                    verification code.
+                </div>
+
+                <form
+                    method="post"
+                    action="{% url 'telegram_send_code' %}"
+                >
+
+                    {% csrf_token %}
+
+                    <div class="form-group">
+
+                        {{ phone_form.phone.label_tag }}
+
+                        {{ phone_form.phone }}
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="btn-primary"
+                    >
+                        Send Telegram Code
+                    </button>
+
+                </form>
+
+
+                <div class="security-note">
+                    🔒 Your Telegram credentials belong only to your
+                    account. Other users cannot access your Telegram
+                    session or connection.
+                </div>
+
+            {% endif %}
+
+        </section>
+
+
+        <a href="{% url 'home' %}" class="back-link">
+            ← Back to Dashboard
+        </a>
+
+    </div>
+
+</main>
+
+
+<footer class="footer">
+
+    <div class="container footer-inner">
+
+        <span>
+            © 2026 Telegram Forwarder
+        </span>
+
+        <span>
+            Secure Telegram Connection
+        </span>
+
+    </div>
+
+</footer>
+
+</body>
+</html>
