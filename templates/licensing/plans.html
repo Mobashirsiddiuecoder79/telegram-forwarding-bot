@@ -986,7 +986,7 @@ async function startPayment(button) {
                  * Send Razorpay's response to Django.
                  *
                  * Django will verify the signature using
-                 * RAZORPAY_KEY_SECRET.
+                 * The payment signature is verified securely on the Django server.
                  */
                 const formData = new FormData();
 
