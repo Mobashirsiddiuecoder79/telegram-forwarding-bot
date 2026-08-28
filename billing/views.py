@@ -84,6 +84,8 @@ def create_order(request, plan_id):
             "order_id": order["id"],
             "amount": amount_paise,
             "currency": "INR",
+            "profile_phone": request.user.profile.phone_number,
+            "profile_email": request.user.email,
             "payment_id": payment.id,
             "plan_id": plan.id,
             "plan_name": plan.name,

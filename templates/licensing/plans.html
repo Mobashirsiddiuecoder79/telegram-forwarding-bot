@@ -979,6 +979,11 @@ async function startPayment(button) {
 
             order_id: orderData.order_id,
 
+            prefill: {
+                contact: orderData.profile_phone,
+                email: orderData.profile_email
+            },
+
             handler: async function(response) {
 
                 /*
