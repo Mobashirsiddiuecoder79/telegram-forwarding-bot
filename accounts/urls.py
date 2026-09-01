@@ -3,7 +3,7 @@ from django.urls import path
 from django.views.decorators.cache import never_cache
 
 from . import views
-from .views import register
+from .views import register, verify_email
 from .telegram_views import (
     telegram_connection,
     telegram_send_code,
@@ -76,6 +76,12 @@ urlpatterns = [
         "register/",
         register,
         name="register",
+    ),
+
+    path(
+        "verify-email/",
+        verify_email,
+        name="verify_email",
     ),
 
     path(

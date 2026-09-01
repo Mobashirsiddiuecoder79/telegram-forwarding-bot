@@ -12,6 +12,10 @@ class UserProfile(models.Model):
     full_name = models.CharField(max_length=150)
     email = models.EmailField()
     phone_number = models.CharField(max_length=20)
+
+    email_verified = models.BooleanField(default=True)
+    email_otp_hash = models.CharField(max_length=128, blank=True)
+    email_otp_expires_at = models.DateTimeField(null=True, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
