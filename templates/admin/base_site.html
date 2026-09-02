@@ -4,15 +4,15 @@
 
 {% block branding %}
 <div id="site-name">
-    <a href="{% url 'admin:index' %}" class="admin-brand">
-        <span class="admin-logo">T</span>
-        <span>
+    <a href="{% url 'admin:index' %}" class="tf-brand">
+        <span class="tf-logo">T</span>
+        <span class="tf-brand-text">
             <strong>Telegram Forwarder</strong>
             <small>Administration</small>
         </span>
     </a>
 
-    <a href="{% url 'admin_monitoring_dashboard' %}" class="monitoring-link">
+    <a href="{% url 'admin_monitoring_dashboard' %}" class="tf-monitoring">
         Monitoring
     </a>
 </div>
@@ -22,355 +22,416 @@
 {{ block.super }}
 
 <style>
-    /* ================================
-       TELEGRAM FORWARDER ADMIN
-    ================================= */
+/* =========================================================
+   TELEGRAM FORWARDER — DJANGO ADMIN THEME
+   Uses Django's native light/dark theme system.
+========================================================= */
 
-    :root {
-        --primary: #2563eb;
-        --primary-dark: #1d4ed8;
-        --dark: #111827;
-        --text: #374151;
-        --muted: #64748b;
-        --background: #f4f7fb;
-        --card: #ffffff;
-        --border: #e2e8f0;
-    }
+:root {
+    --primary: #2563eb;
+    --secondary: #1d4ed8;
+    --accent: #2563eb;
+    --primary-fg: #ffffff;
 
-    body {
-        background: var(--background) !important;
-        color: var(--text);
-        font-family:
-            -apple-system,
-            BlinkMacSystemFont,
-            "Segoe UI",
-            Roboto,
-            Helvetica,
-            Arial,
-            sans-serif !important;
-    }
+    --body-fg: #334155;
+    --body-bg: #f4f7fb;
+    --body-quiet-color: #64748b;
+    --body-loud-color: #111827;
 
-    /* Header */
+    --header-color: #111827;
+    --header-branding-color: #111827;
+    --header-bg: #ffffff;
+
+    --link-fg: #2563eb;
+    --link-hover-color: #1d4ed8;
+    --link-selected-fg: #1d4ed8;
+
+    --hairline-color: #e2e8f0;
+    --border-color: #cbd5e1;
+
+    --darkened-bg: #f8fafc;
+    --selected-bg: #eff6ff;
+
+    --button-fg: #ffffff;
+    --button-bg: #2563eb;
+    --button-hover-bg: #1d4ed8;
+
+    --close-button-bg: #64748b;
+    --close-button-hover-bg: #475569;
+
+    --default-button-bg: #2563eb;
+    --default-button-hover-bg: #1d4ed8;
+
+    --delete-button-bg: #dc2626;
+    --delete-button-hover-bg: #b91c1c;
+}
+
+
+/* =========================================================
+   DARK MODE
+   Django sets html[data-theme="dark"] when dark mode is active.
+========================================================= */
+
+html[data-theme="dark"] {
+    --primary: #60a5fa;
+    --secondary: #3b82f6;
+    --accent: #60a5fa;
+    --primary-fg: #0f172a;
+
+    --body-fg: #d1d5db;
+    --body-bg: #0f172a;
+    --body-quiet-color: #94a3b8;
+    --body-loud-color: #f8fafc;
+
+    --header-color: #f8fafc;
+    --header-branding-color: #f8fafc;
+    --header-bg: #111827;
+
+    --link-fg: #60a5fa;
+    --link-hover-color: #93c5fd;
+    --link-selected-fg: #93c5fd;
+
+    --hairline-color: #334155;
+    --border-color: #475569;
+
+    --darkened-bg: #1e293b;
+    --selected-bg: #1e3a5f;
+
+    --button-fg: #ffffff;
+    --button-bg: #2563eb;
+    --button-hover-bg: #3b82f6;
+
+    --close-button-bg: #475569;
+    --close-button-hover-bg: #64748b;
+
+    --default-button-bg: #2563eb;
+    --default-button-hover-bg: #3b82f6;
+
+    --delete-button-bg: #dc2626;
+    --delete-button-hover-bg: #ef4444;
+}
+
+
+/* =========================================================
+   BRAND
+========================================================= */
+
+#header {
+    min-height: 72px;
+    padding: 0 32px;
+    box-sizing: border-box;
+    border-bottom: 1px solid var(--hairline-color);
+    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.06);
+}
+
+#branding {
+    display: flex;
+    align-items: center;
+}
+
+#site-name {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+}
+
+.tf-brand {
+    display: flex !important;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none !important;
+    color: var(--header-branding-color) !important;
+}
+
+.tf-brand:hover {
+    color: var(--link-fg) !important;
+}
+
+.tf-logo {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: linear-gradient(
+        135deg,
+        #3b82f6,
+        #2563eb
+    );
+
+    color: white !important;
+
+    font-size: 23px;
+    font-weight: 800;
+
+    box-shadow:
+        0 5px 15px rgba(37, 99, 235, 0.28);
+}
+
+.tf-brand-text strong {
+    display: block;
+    font-size: 20px;
+    line-height: 1.1;
+    font-weight: 800;
+}
+
+.tf-brand-text small {
+    display: block;
+    margin-top: 4px;
+
+    color: var(--body-quiet-color);
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   MONITORING BUTTON
+========================================================= */
+
+.tf-monitoring {
+    display: inline-flex !important;
+    align-items: center;
+
+    padding: 9px 17px;
+
+    border-radius: 11px;
+
+    background: var(--selected-bg);
+    border: 1px solid var(--link-fg);
+
+    color: var(--link-fg) !important;
+
+    text-decoration: none !important;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.tf-monitoring:hover {
+    background: var(--link-fg);
+    color: var(--primary-fg) !important;
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   USER TOOLS
+========================================================= */
+
+#user-tools {
+    color: var(--body-quiet-color) !important;
+}
+
+#user-tools a {
+    color: var(--link-fg) !important;
+}
+
+#user-tools a:hover {
+    color: var(--link-hover-color) !important;
+}
+
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+#content {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 32px !important;
+}
+
+.breadcrumbs {
+    background: transparent !important;
+    color: var(--body-quiet-color) !important;
+}
+
+.breadcrumbs a {
+    color: var(--link-fg) !important;
+}
+
+
+/* =========================================================
+   MODULE CARDS
+========================================================= */
+
+.module {
+    border-radius: 16px !important;
+    overflow: hidden;
+
+    border: 1px solid var(--hairline-color) !important;
+
+    box-shadow:
+        0 4px 18px rgba(15, 23, 42, 0.06) !important;
+}
+
+.module caption,
+.module h2 {
+    padding: 18px 20px !important;
+
+    color: var(--body-loud-color) !important;
+
+    font-size: 16px !important;
+    font-weight: 800 !important;
+}
+
+.module caption a {
+    color: var(--body-loud-color) !important;
+}
+
+.module th,
+.module td {
+    border-bottom: 1px solid var(--hairline-color) !important;
+}
+
+.module th {
+    color: var(--body-loud-color) !important;
+}
+
+.module td {
+    color: var(--body-fg) !important;
+}
+
+.module td a {
+    color: var(--link-fg) !important;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   CHANGE LIST
+========================================================= */
+
+#changelist {
+    background: transparent !important;
+}
+
+#changelist-filter {
+    border-radius: 14px;
+    overflow: hidden;
+
+    border: 1px solid var(--hairline-color);
+}
+
+#changelist-filter h2 {
+    color: var(--body-loud-color) !important;
+}
+
+#changelist-filter h3 {
+    color: var(--body-loud-color) !important;
+}
+
+#changelist-filter a {
+    color: var(--link-fg) !important;
+}
+
+#changelist-form .results {
+    border-radius: 14px;
+    overflow: hidden;
+
+    border: 1px solid var(--hairline-color);
+}
+
+
+/* =========================================================
+   FORMS
+========================================================= */
+
+input,
+textarea,
+select {
+    border-radius: 8px !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--primary) !important;
+
+    box-shadow:
+        0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+
+    outline: none !important;
+}
+
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.button,
+input[type="submit"],
+.submit-row input,
+a.button {
+    border-radius: 9px !important;
+    font-weight: 700 !important;
+}
+
+.object-tools a {
+    border-radius: 9px !important;
+    font-weight: 700 !important;
+}
+
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.actions {
+    border-radius: 10px;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+#footer {
+    color: var(--body-quiet-color) !important;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 800px) {
 
     #header {
-        background: #ffffff !important;
-        color: var(--dark) !important;
-        border-bottom: 1px solid var(--border);
-        min-height: 72px;
-        padding: 0 32px;
-        display: flex;
-        align-items: center;
-        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+        padding: 12px 18px;
+        min-height: auto;
     }
 
-    #branding {
-        display: flex;
-        align-items: center;
+    #content {
+        padding: 20px !important;
     }
 
     #site-name {
-        display: flex;
-        align-items: center;
-        gap: 28px;
-    }
-
-    .admin-brand {
-        display: flex !important;
-        align-items: center;
         gap: 12px;
-        text-decoration: none !important;
-        color: var(--dark) !important;
     }
 
-    .admin-brand:hover {
-        color: var(--primary) !important;
+    .tf-monitoring {
+        display: none !important;
     }
 
-    .admin-brand strong {
-        display: block;
-        font-size: 20px;
-        font-weight: 800;
-        line-height: 1.1;
+    .tf-brand-text strong {
+        font-size: 17px;
     }
 
-    .admin-brand small {
-        display: block;
-        margin-top: 3px;
-        color: var(--muted);
-        font-size: 12px;
-        font-weight: 500;
+    .tf-logo {
+        width: 40px;
+        height: 40px;
     }
-
-    .admin-logo {
-        width: 42px;
-        height: 42px;
-        border-radius: 12px;
-        background: linear-gradient(135deg, #3b82f6, #2563eb);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 22px;
-        font-weight: 800;
-        box-shadow: 0 5px 14px rgba(37, 99, 235, 0.25);
-    }
-
-    .monitoring-link {
-        background: #eff6ff;
-        color: var(--primary) !important;
-        border: 1px solid #bfdbfe;
-        border-radius: 10px;
-        padding: 9px 16px;
-        text-decoration: none !important;
-        font-weight: 700;
-        font-size: 13px;
-        transition: 0.2s ease;
-    }
-
-    .monitoring-link:hover {
-        background: var(--primary);
-        color: white !important;
-        border-color: var(--primary);
-    }
-
-    #user-tools {
-        color: var(--muted) !important;
-        font-size: 13px;
-    }
-
-    #user-tools a {
-        color: var(--primary) !important;
-        font-weight: 600;
-    }
-
-    /* Main */
-
-    #content {
-        padding: 32px !important;
-        max-width: 1500px;
-        margin: 0 auto;
-    }
-
-    #content-main {
-        width: 100% !important;
-    }
-
-    .breadcrumbs {
-        background: transparent !important;
-        padding: 0 0 20px !important;
-        color: var(--muted) !important;
-        font-size: 13px;
-    }
-
-    .breadcrumbs a {
-        color: var(--primary) !important;
-    }
-
-    /* Dashboard modules */
-
-    .module {
-        background: var(--card) !important;
-        border: 1px solid var(--border) !important;
-        border-radius: 16px !important;
-        overflow: hidden;
-        box-shadow:
-            0 4px 15px rgba(15, 23, 42, 0.04) !important;
-        margin-bottom: 24px !important;
-    }
-
-    .module caption,
-    .module h2 {
-        background: #ffffff !important;
-        color: var(--dark) !important;
-        border-bottom: 1px solid var(--border);
-        padding: 18px 20px !important;
-        font-size: 16px !important;
-        font-weight: 800 !important;
-    }
-
-    .module caption a {
-        color: var(--dark) !important;
-    }
-
-    .module table {
-        border-collapse: collapse;
-    }
-
-    .module th,
-    .module td {
-        border-bottom: 1px solid #eef2f7 !important;
-        padding: 14px 18px !important;
-    }
-
-    .module tr:last-child th,
-    .module tr:last-child td {
-        border-bottom: none !important;
-    }
-
-    .module th {
-        color: var(--dark);
-        font-weight: 700;
-    }
-
-    .module td {
-        color: var(--muted);
-    }
-
-    .module td a {
-        color: var(--primary) !important;
-        font-weight: 600;
-    }
-
-    /* Buttons */
-
-    input[type="submit"],
-    .submit-row input,
-    .button,
-    a.button {
-        border-radius: 9px !important;
-        font-weight: 700 !important;
-        padding: 10px 18px !important;
-        border: none !important;
-    }
-
-    input[type="submit"],
-    .submit-row input.default {
-        background: var(--primary) !important;
-    }
-
-    input[type="submit"]:hover,
-    .submit-row input.default:hover {
-        background: var(--primary-dark) !important;
-    }
-
-    .button,
-    a.button {
-        background: #eef2ff !important;
-        color: var(--primary) !important;
-    }
-
-    /* Forms */
-
-    input,
-    textarea,
-    select {
-        border: 1px solid #cbd5e1 !important;
-        border-radius: 8px !important;
-        padding: 9px 11px !important;
-    }
-
-    input:focus,
-    textarea:focus,
-    select:focus {
-        border-color: var(--primary) !important;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12) !important;
-        outline: none !important;
-    }
-
-    /* Change list */
-
-    #changelist {
-        background: transparent !important;
-    }
-
-    #changelist-filter {
-        background: white !important;
-        border: 1px solid var(--border);
-        border-radius: 14px;
-        overflow: hidden;
-    }
-
-    #changelist-filter h2 {
-        background: #f8fafc !important;
-        color: var(--dark) !important;
-        padding: 14px 16px;
-    }
-
-    #changelist-filter h3 {
-        color: var(--dark);
-        font-weight: 700;
-    }
-
-    #changelist-filter a {
-        color: var(--primary) !important;
-    }
-
-    #changelist-form .results {
-        background: white;
-        border: 1px solid var(--border);
-        border-radius: 14px;
-        overflow: hidden;
-    }
-
-    #changelist table thead th {
-        background: #f8fafc !important;
-        color: var(--dark) !important;
-    }
-
-    #changelist table tbody tr:hover {
-        background: #f8fbff !important;
-    }
-
-    /* Object tools */
-
-    .object-tools a {
-        background: var(--primary) !important;
-        border-radius: 9px !important;
-        font-weight: 700 !important;
-        padding: 9px 15px !important;
-    }
-
-    .object-tools a:hover {
-        background: var(--primary-dark) !important;
-    }
-
-    /* Messages */
-
-    .messagelist {
-        margin: 0 0 24px !important;
-    }
-
-    .messagelist li {
-        border-radius: 10px !important;
-        padding: 13px 16px !important;
-    }
-
-    /* Footer */
-
-    #footer {
-        margin-top: 30px;
-        padding: 20px;
-        color: var(--muted);
-        text-align: center;
-    }
-
-    /* Responsive */
-
-    @media (max-width: 800px) {
-        #header {
-            padding: 12px 18px;
-            min-height: auto;
-        }
-
-        #content {
-            padding: 20px !important;
-        }
-
-        #site-name {
-            gap: 12px;
-        }
-
-        .monitoring-link {
-            display: none;
-        }
-
-        .admin-brand strong {
-            font-size: 16px;
-        }
-
-        #user-tools {
-            font-size: 11px;
-        }
-    }
+}
 </style>
 {% endblock %}
