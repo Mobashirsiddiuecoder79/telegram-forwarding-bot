@@ -91,6 +91,33 @@ def forwarding_dashboard(request):
 
     quota = get_forwarding_quota(request.user)
 
+    if request.method == "POST":
+        pair_id = request.POST.get("pair_id")
+        if pair_id:
+            pair = ChannelPair.objects.filter(
+                id=pair_id,
+                user=request.user,
+            ).first()
+
+            if not pair:
+                messages.error(request, "Invalid channel pair.")
+                return redirect("forwarding_dashboard")
+
+            try:
+                message_limit = int(request.POST.get("message_limit", "0"))
+            except (TypeError, ValueError):
+                messages.error(request, "Enter a valid message limit.")
+                return redirect("forwarding_dashboard")
+
+            if message_limit < 0:
+                messages.error(request, "Message limit cannot be negative.")
+                return redirect("forwarding_dashboard")
+
+            pair.message_limit = message_limit
+            pair.save(update_fields=["message_limit", "updated_at"])
+            messages.success(request, "Channel pair limit updated successfully.")
+            return redirect("forwarding_dashboard")
+
     return render(
         request,
         "forwarding/dashboard.html",

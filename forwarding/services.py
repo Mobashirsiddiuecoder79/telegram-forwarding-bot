@@ -62,11 +62,15 @@ async def forward_user_channels(user, max_messages=None):
 
             count = 0
             skipped = 0
+            pair_limit = pair.message_limit
 
             async for message in client.iter_messages(
                 pair.source_chat_id
             ):
                 if max_messages is not None and total_forwarded >= max_messages:
+                    break
+
+                if pair_limit > 0 and count >= pair_limit:
                     break
 
                 if cache.get(f"forwarding_stop_{user.id}"):

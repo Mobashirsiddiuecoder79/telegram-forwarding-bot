@@ -16,6 +16,7 @@ class ChannelPair(models.Model):
     destination_name = models.CharField(max_length=255, blank=True)
 
     is_active = models.BooleanField(default=True)
+    message_limit = models.PositiveIntegerField(default=0, help_text="Maximum messages to forward for this channel pair. 0 means no pair-specific limit.")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
