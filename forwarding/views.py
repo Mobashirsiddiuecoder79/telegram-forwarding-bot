@@ -14,6 +14,7 @@ from licensing.services import (
 
 from licensing.services import get_active_subscription, get_forwarding_quota
 
+from forwarding.models import ForwardedMessage
 from .services import (
     check_user_channel_access,
     forward_user_channels,
@@ -140,6 +141,48 @@ def forwarding_dashboard(request):
             "channel_pairs": pairs,
             "connection": connection,
             "quota": quota,
+        },
+    )
+
+
+@login_required
+def admin_monitoring_dashboard(request):
+    if not request.user.is_staff:
+        messages.error(request, "You do not have permission to access this page.")
+        return redirect("forwarding_dashboard")
+
+    from django.contrib.auth import get_user_model
+    from django.db.models import Count
+
+    User = get_user_model()
+    users = User.objects.annotate(
+        forwarded_count=Count("forwarded_messages", distinct=True),
+        channel_pair_count=Count("channel_pairs", distinct=True),
+    ).order_by("-forwarded_count")
+
+    total_users = User.objects.count()
+    connected_users = TelegramConnection.objects.filter(
+        is_connected=True
+    ).values("user_id").distinct().count()
+    total_pairs = ChannelPair.objects.count()
+    active_pairs = ChannelPair.objects.filter(is_active=True).count()
+    total_forwarded = ForwardedMessage.objects.count()
+    active_jobs = sum(
+        1 for user in User.objects.all()
+        if cache.get(f"forwarding_running_{user.id}")
+    )
+
+    return render(
+        request,
+        "forwarding/admin_monitoring.html",
+        {
+            "users": users,
+            "total_users": total_users,
+            "connected_users": connected_users,
+            "total_pairs": total_pairs,
+            "active_pairs": active_pairs,
+            "total_forwarded": total_forwarded,
+            "active_jobs": active_jobs,
         },
     )
 
