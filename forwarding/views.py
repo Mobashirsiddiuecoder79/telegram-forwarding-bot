@@ -91,6 +91,13 @@ def forwarding_dashboard(request):
 
     quota = get_forwarding_quota(request.user)
 
+    # Keep pair limits within the user's currently remaining quota.
+    remaining_quota = quota["remaining"]
+    for pair in pairs:
+        if pair.message_limit > 0 and pair.message_limit > remaining_quota:
+            pair.message_limit = remaining_quota
+            pair.save(update_fields=["message_limit"])
+
     if request.method == "POST":
         pair_id = request.POST.get("pair_id")
         if pair_id:
@@ -112,6 +119,14 @@ def forwarding_dashboard(request):
             if message_limit < 0:
                 messages.error(request, "Message limit cannot be negative.")
                 return redirect("forwarding_dashboard")
+
+            # A pair limit cannot exceed the user's remaining daily quota.
+            if message_limit > 0 and message_limit > quota["remaining"]:
+                message_limit = quota["remaining"]
+                messages.info(
+                    request,
+                    f"Message limit was capped at your remaining quota of {message_limit} messages.",
+                )
 
             pair.message_limit = message_limit
             pair.save(update_fields=["message_limit", "updated_at"])

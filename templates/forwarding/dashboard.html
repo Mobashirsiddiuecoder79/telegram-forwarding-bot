@@ -404,7 +404,7 @@
                                 <input type="hidden" name="pair_id" value="{{ pair.id }}">
                                 <div class="pair-limit-label">Message limit</div>
                                 <div class="pair-limit-row">
-                                    <input type="number" name="message_limit" min="0" value="{{ pair.message_limit }}" class="pair-limit-input">
+                                    <input type="number" name="message_limit" min="0" max="{{ quota.remaining }}" value="{{ pair.message_limit }}" class="pair-limit-input">
                                     <button type="submit" class="pair-limit-button">Save</button>
                                 </div>
                                 <div class="pair-limit-help">0 = no pair limit</div>
@@ -428,10 +428,15 @@
                         {% csrf_token %}
 
                         <div style="margin-bottom: 12px;">
-                            <div class="forwarding-limit-info">
-                                <span>Daily quota remaining</span>
-                                <strong>{{ quota.remaining }}</strong>
-                            </div>
+                            <button
+                                type="submit"
+                                class="run-button"
+                                {% if not connection or not quota.remaining %}
+                                    disabled
+                                {% endif %}
+                            >
+                                Start Forwarding
+                            </button>
                         </div>
 
                     <form
