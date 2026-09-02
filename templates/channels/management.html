@@ -400,6 +400,230 @@
 </style>
 
 
+<style> .forwarding-rules-card{margin:28px 0;padding:26px 28px;border:1px solid #e5e7eb;border-radius:18px;background:#fff;box-shadow:0 8px 24px rgba(15,23,42,.05)} .forwarding-rules-header{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:24px}.forwarding-rules-header h3{margin:0;font-size:24px;color:#111827}.forwarding-rules-header p{margin:6px 0 0;color:#6b7280;font-size:14px}.rule-toggle{display:flex;align-items:center;gap:9px;font-weight:600;color:#374151;white-space:nowrap}.rule-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.rule-field label,.rule-group-title{display:block;margin-bottom:8px;font-size:14px;font-weight:700;color:#374151}.rule-field textarea{width:100%;min-height:86px;padding:12px 14px;border:1px solid #d1d5db;border-radius:10px;background:#f9fafb;font:inherit;resize:vertical;box-sizing:border-box}.rule-field textarea:focus{outline:none;border-color:#2563eb;background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.1)}.rule-group{margin-top:22px}.rule-options{display:flex;flex-wrap:wrap;gap:10px}.rule-options label,.caption-option{display:flex;align-items:center;gap:8px;padding:10px 13px;border:1px solid #e5e7eb;border-radius:10px;background:#f9fafb;color:#374151;font-size:14px}.rule-options label:hover,.caption-option:hover{border-color:#bfdbfe;background:#eff6ff}.caption-option{margin-top:18px;width:max-content;max-width:100%;box-sizing:border-box}.rule-actions{display:flex;justify-content:flex-end;margin-top:22px}.btn-save-rules{min-height:44px;padding:10px 20px;border:0;border-radius:10px;background:#2563eb;color:#fff;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 10px rgba(37,99,235,.2)}.btn-save-rules:hover{background:#1d4ed8;transform:translateY(-1px)}@media(max-width:700px){.forwarding-rules-header{align-items:flex-start;flex-direction:column}.rule-grid{grid-template-columns:1fr}.caption-option{width:100%}.rule-actions{justify-content:stretch}.btn-save-rules{width:100%}} </style>
+<style>
+/* =========================================
+   ADVANCED FORWARDING RULES
+========================================= */
+
+.forwarding-rules-form {
+    margin-top: 28px;
+    padding: 30px;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+.forwarding-rules-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 28px;
+}
+
+.forwarding-rules-title h3 {
+    margin: 0;
+    color: #111827;
+    font-size: 24px;
+    font-weight: 750;
+    letter-spacing: -0.4px;
+}
+
+.forwarding-rules-title p {
+    margin: 7px 0 0;
+    color: #6b7280;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.rules-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 13px;
+    border: 1px solid #dbeafe;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.rules-toggle input {
+    width: 17px;
+    height: 17px;
+    margin: 0;
+    accent-color: #2563eb;
+}
+
+.rule-section {
+    margin-top: 26px;
+}
+
+.rule-section-title {
+    margin-bottom: 12px;
+    color: #374151;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.rule-section-description {
+    margin: -5px 0 13px;
+    color: #9ca3af;
+    font-size: 13px;
+}
+
+.rule-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.rule-field label {
+    display: block;
+    margin-bottom: 8px;
+    color: #374151;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.rule-field textarea {
+    width: 100%;
+    min-height: 88px;
+    padding: 13px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 11px;
+    background: #f9fafb;
+    color: #111827;
+    font: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+    resize: vertical;
+    box-sizing: border-box;
+    transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.rule-field textarea::placeholder {
+    color: #9ca3af;
+}
+
+.rule-field textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .10);
+}
+
+.rule-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.rule-option {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 42px;
+    padding: 9px 13px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #f9fafb;
+    color: #374151;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all .2s ease;
+}
+
+.rule-option:hover {
+    border-color: #bfdbfe;
+    background: #eff6ff;
+    transform: translateY(-1px);
+}
+
+.rule-option input,
+.caption-option input {
+    width: 17px;
+    height: 17px;
+    margin: 0;
+    accent-color: #2563eb;
+}
+
+.caption-option {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: fit-content;
+    margin-top: 18px;
+    padding: 10px 13px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #f9fafb;
+    color: #374151;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.rule-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 28px;
+    padding-top: 22px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.btn-save-rules {
+    min-height: 46px;
+    padding: 11px 22px;
+    border: 0;
+    border-radius: 10px;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 5px 14px rgba(37, 99, 235, .20);
+    transition: all .2s ease;
+}
+
+.btn-save-rules:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 7px 18px rgba(37, 99, 235, .25);
+}
+
+@media (max-width: 700px) {
+    .forwarding-rules-form {
+        padding: 20px;
+    }
+
+    .forwarding-rules-header {
+        flex-direction: column;
+    }
+
+    .rule-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rules-toggle {
+        width: 100%;
+        box-sizing: border-box;
+        justify-content: center;
+    }
+
+    .rule-actions {
+        justify-content: stretch;
+    }
+
+    .btn-save-rules {
+        width: 100%;
+    }
+}
+</style>
+
 </head>
 
 <body>
@@ -656,35 +880,104 @@
 
                     {% for pair in channel_pairs %}
     <form method="post" class="forwarding-rules-form">
-        {% csrf_token %}
-        <input type="hidden" name="rule_pair_id" value="{{ pair.id }}">
+    {% csrf_token %}
+    <input type="hidden" name="rule_pair_id" value="{{ pair.id }}">
 
-        <h3>Advanced Forwarding Rules</h3>
+    <div class="forwarding-rules-header">
+        <div class="forwarding-rules-title">
+            <h3>Advanced Forwarding Rules</h3>
+            <p>Choose exactly which messages should be forwarded from this source.</p>
+        </div>
 
-        {{ pair.forwarding_rule_form.enabled }}
-        {{ pair.forwarding_rule_form.enabled.label_tag }}
+        <label class="rules-toggle">
+            {{ pair.forwarding_rule_form.enabled }}
+            <span>Enable Rules</span>
+        </label>
+    </div>
 
-        {{ pair.forwarding_rule_form.keywords.label_tag }}
-        {{ pair.forwarding_rule_form.keywords }}
+    <div class="rule-section">
+        <div class="rule-section-title">Keyword Filters</div>
+        <div class="rule-section-description">
+            Forward messages only when they match your keywords, while blocking unwanted terms.
+        </div>
 
-        {{ pair.forwarding_rule_form.blocked_keywords.label_tag }}
-        {{ pair.forwarding_rule_form.blocked_keywords }}
+        <div class="rule-grid">
+            <div class="rule-field">
+                {{ pair.forwarding_rule_form.keywords.label_tag }}
+                {{ pair.forwarding_rule_form.keywords }}
+            </div>
 
-        <p>Content Types</p>
-        {{ pair.forwarding_rule_form.allow_text }} Text
-        {{ pair.forwarding_rule_form.allow_photos }} Photos
-        {{ pair.forwarding_rule_form.allow_videos }} Videos
-        {{ pair.forwarding_rule_form.allow_documents }} Documents
-        {{ pair.forwarding_rule_form.allow_audio }} Audio
+            <div class="rule-field">
+                {{ pair.forwarding_rule_form.blocked_keywords.label_tag }}
+                {{ pair.forwarding_rule_form.blocked_keywords }}
+            </div>
+        </div>
+    </div>
 
-        <p>Message Types</p>
-        {{ pair.forwarding_rule_form.allow_normal }} Normal messages
-        {{ pair.forwarding_rule_form.allow_forwarded }} Forwarded messages
+    <div class="rule-section">
+        <div class="rule-section-title">Content Types</div>
+        <div class="rule-section-description">
+            Select the types of content that can be forwarded.
+        </div>
 
-        {{ pair.forwarding_rule_form.filter_captions }} Apply keyword filters to captions
+        <div class="rule-options">
+            <label class="rule-option">
+                {{ pair.forwarding_rule_form.allow_text }}
+                <span>Text</span>
+            </label>
 
-        <button type="submit">Save Forwarding Rules</button>
-    </form>
+            <label class="rule-option">
+                {{ pair.forwarding_rule_form.allow_photos }}
+                <span>Photos</span>
+            </label>
+
+            <label class="rule-option">
+                {{ pair.forwarding_rule_form.allow_videos }}
+                <span>Videos</span>
+            </label>
+
+            <label class="rule-option">
+                {{ pair.forwarding_rule_form.allow_documents }}
+                <span>Documents</span>
+            </label>
+
+            <label class="rule-option">
+                {{ pair.forwarding_rule_form.allow_audio }}
+                <span>Audio</span>
+            </label>
+        </div>
+    </div>
+
+    <div class="rule-section">
+        <div class="rule-section-title">Message Types</div>
+        <div class="rule-section-description">
+            Decide whether normal and previously forwarded messages are allowed.
+        </div>
+
+        <div class="rule-options">
+            <label class="rule-option">
+                {{ pair.forwarding_rule_form.allow_normal }}
+                <span>Normal messages</span>
+            </label>
+
+            <label class="rule-option">
+                {{ pair.forwarding_rule_form.allow_forwarded }}
+                <span>Forwarded messages</span>
+            </label>
+        </div>
+
+        <label class="caption-option">
+            {{ pair.forwarding_rule_form.filter_captions }}
+            <span>Apply keyword filters to captions</span>
+        </label>
+    </div>
+
+    <div class="rule-actions">
+        <button type="submit" class="btn-save-rules">
+            Save Forwarding Rules
+        </button>
+    </div>
+</form></div>
 
 
 
