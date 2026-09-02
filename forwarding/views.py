@@ -207,9 +207,7 @@ def start_forwarding(request):
         is_active=True,
     )
 
-    active_pairs = active_pairs_qs.count()
-
-    if active_pairs == 0:
+    if not active_pairs_qs.exists():
         messages.error(
             request,
             "Please add at least one active channel pair first.",
@@ -259,7 +257,6 @@ def start_forwarding(request):
         )
         return redirect("forwarding_dashboard")
 
-    # Prevent multiple forwarding jobs for the same user.
     running_key = f"forwarding_running_{request.user.id}"
     stop_key = f"forwarding_stop_{request.user.id}"
 
@@ -270,7 +267,6 @@ def start_forwarding(request):
         )
         return redirect("forwarding_dashboard")
 
-    # Clear any previous stop request and mark this job as running.
     cache.delete(stop_key)
     cache.set(running_key, True, timeout=3600)
 
@@ -285,6 +281,12 @@ def start_forwarding(request):
                     f"{request.user.username}: "
                     f"Telegram access check failed: "
                     f"{access.get('error', 'Unknown error')}"
+                )
+                return
+
+            if cache.get(stop_key):
+                print(
+                    f"{request.user.username}: forwarding stopped before start."
                 )
                 return
 
@@ -309,12 +311,8 @@ def start_forwarding(request):
             )
 
         finally:
-            cache.delete(
-                f"forwarding_stop_{request.user.id}"
-            )
-            cache.delete(
-                f"forwarding_running_{request.user.id}"
-            )
+            cache.delete(stop_key)
+            cache.delete(running_key)
 
     import threading
 
@@ -325,158 +323,7 @@ def start_forwarding(request):
 
     messages.success(
         request,
-        (
-            f"Forwarding started for up to "
-            f"{requested_count} messages."
-        ),
+        "Forwarding started. You can stop it at any time.",
     )
-
-    return redirect("forwarding_dashboard")
-    try:
-        requested_count = int(request.POST.get("forward_count", "1"))
-    except (TypeError, ValueError):
-        messages.error(
-            request,
-            "Please enter a valid number of messages.",
-        )
-        return redirect("forwarding_dashboard")
-
-    if requested_count < 1:
-        messages.error(
-            request,
-            "Please enter at least 1 message.",
-        )
-        return redirect("forwarding_dashboard")
-
-    quota = get_forwarding_quota(request.user)
-
-    if requested_count > quota["remaining"]:
-        messages.error(
-            request,
-            (
-                f"You requested {requested_count} messages, "
-                f"but only {quota['remaining']} messages remain "
-                "in your forwarding quota."
-            ),
-        )
-        return redirect("forwarding_dashboard")
-
-    connection = TelegramConnection.objects.filter(
-        user=request.user,
-        is_connected=True,
-    ).first()
-
-    if not connection:
-        messages.error(
-            request,
-            "Please connect your Telegram account first.",
-        )
-        return redirect("forwarding_dashboard")
-
-    active_pairs_qs = ChannelPair.objects.filter(
-        user=request.user,
-        is_active=True,
-    )
-
-    active_pairs = active_pairs_qs.count()
-
-    # Enforce the subscription's source/destination limits
-    # before starting a forwarding job.
-    subscription = get_active_subscription(request.user)
-
-    if subscription:
-        max_sources = subscription.plan.max_sources
-        max_destinations = subscription.plan.max_destinations
-    else:
-        max_sources = 1
-        max_destinations = 1
-
-    source_count = (
-        active_pairs_qs
-        .values("source_chat_id")
-        .distinct()
-        .count()
-    )
-
-    destination_count = (
-        active_pairs_qs
-        .values("destination_chat_id")
-        .distinct()
-        .count()
-    )
-
-    if source_count > max_sources:
-        messages.error(
-            request,
-            (
-                f"Your plan allows only {max_sources} source "
-                f"channel{'s' if max_sources != 1 else ''}."
-            ),
-        )
-        return redirect("forwarding_dashboard")
-
-    if destination_count > max_destinations:
-        messages.error(
-            request,
-            (
-                f"Your plan allows only {max_destinations} destination "
-                f"channel{'s' if max_destinations != 1 else ''}."
-            ),
-        )
-        return redirect("forwarding_dashboard")
-
-    if active_pairs == 0:
-        messages.error(
-            request,
-            "Please add at least one active channel pair first.",
-        )
-        return redirect("forwarding_dashboard")
-
-    quota = get_forwarding_quota(request.user)
-
-    if quota["remaining"] == 0:
-        messages.error(
-            request,
-            "Your forwarding quota has been exhausted.",
-        )
-        return redirect("forwarding_dashboard")
-
-    try:
-        access = asyncio.run(
-            check_user_channel_access(request.user)
-        )
-
-        if not access["ok"]:
-            messages.error(
-                request,
-                access.get(
-                    "error",
-                    "Telegram channel access check failed.",
-                ),
-            )
-            return redirect("forwarding_dashboard")
-
-        result = asyncio.run(
-            forward_user_channels(
-                request.user,
-                requested_count,
-            )
-        )
-
-        messages.success(
-            request,
-            (
-                f"Forwarding completed. "
-                f"Pairs: {result['pairs']}, "
-                f"Forwarded: {result['forwarded']}, "
-                f"Skipped: {result['skipped']}."
-            ),
-        )
-
-    except Exception as exc:
-        messages.error(
-            request,
-            f"Forwarding failed: {exc}",
-        )
 
     return redirect("forwarding_dashboard")
