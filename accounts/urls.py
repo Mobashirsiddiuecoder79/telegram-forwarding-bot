@@ -7,6 +7,8 @@ from .views import register, verify_email
 from .telegram_views import (
     telegram_connection,
     telegram_send_code,
+    telegram_resend_code,
+    telegram_cancel,
     telegram_verify_code,
     telegram_verify_2fa,
     telegram_disconnect,
@@ -30,6 +32,18 @@ urlpatterns = [
         "telegram/verify-code/",
         telegram_verify_code,
         name="telegram_verify_code",
+    ),
+
+    path(
+        "telegram/resend-code/",
+        telegram_resend_code,
+        name="telegram_resend_code",
+    ),
+
+    path(
+        "telegram/cancel/",
+        telegram_cancel,
+        name="telegram_cancel",
     ),
 
     path(

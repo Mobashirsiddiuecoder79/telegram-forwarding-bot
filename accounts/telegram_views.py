@@ -231,6 +231,72 @@ def telegram_send_code(request):
 
 
 @login_required
+def telegram_resend_code(request):
+    if request.method != "POST":
+        return redirect("telegram_connection")
+
+    phone = request.session.get("telegram_pending_phone")
+
+    if not phone:
+        messages.error(
+            request,
+            "Your Telegram login session expired. Please enter your phone number again.",
+        )
+        clear_pending_telegram_login(request)
+        return redirect("telegram_connection")
+
+    try:
+        result = asyncio.run(send_code(phone))
+
+    except FloodWaitError as exc:
+        messages.error(
+            request,
+            f"Telegram requested a wait of {exc.seconds} seconds before sending another code.",
+        )
+        return redirect("telegram_connection")
+
+    except Exception as exc:
+        messages.error(
+            request,
+            f"Could not resend the Telegram verification code: {exc}",
+        )
+        return redirect("telegram_connection")
+
+    from django.utils import timezone
+
+    request.session["telegram_pending_session"] = encrypt_session(
+        result["session"]
+    )
+    request.session["telegram_pending_phone"] = phone
+    request.session["telegram_login_started_at"] = timezone.now().timestamp()
+    request.session["telegram_phone_code_hash"] = result["phone_code_hash"]
+    request.session["telegram_2fa_required"] = False
+    request.session.modified = True
+
+    messages.success(
+        request,
+        "A new Telegram verification code has been sent.",
+    )
+
+    return redirect("telegram_connection")
+
+
+@login_required
+def telegram_cancel(request):
+    if request.method != "POST":
+        return redirect("telegram_connection")
+
+    clear_pending_telegram_login(request)
+
+    messages.info(
+        request,
+        "Telegram connection was cancelled.",
+    )
+
+    return redirect("telegram_connection")
+
+
+@login_required
 def telegram_verify_code(request):
     if request.method != "POST":
         return redirect("telegram_connection")

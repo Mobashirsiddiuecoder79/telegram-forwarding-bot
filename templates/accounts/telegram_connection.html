@@ -229,6 +229,64 @@
                 text-align: left;
             }
         }
+    
+
+        .telegram-action-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .telegram-action-form {
+            flex: 1;
+        }
+
+        .btn-secondary {
+            width: 100%;
+            min-height: 48px;
+            padding: 12px 18px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            background: #ffffff;
+            color: #374151;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            border-color: #2563eb;
+            color: #2563eb;
+            background: #f8faff;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 600px) {
+            .telegram-action-row {
+                flex-direction: column;
+            }
+        }
+
+    
+
+        .btn-resend {
+            background: #eef4ff;
+            border-color: #b9d0ff;
+            color: #2563eb;
+        }
+
+        .btn-resend:hover {
+            background: #dbe8ff;
+            border-color: #2563eb;
+            color: #1d4ed8;
+        }
+
     </style>
 </head>
 
@@ -463,6 +521,38 @@
                     </button>
 
                 </form>
+
+                <div class="telegram-action-row">
+
+                    <form
+                        method="post"
+                        action="{% url 'telegram_resend_code' %}"
+                        class="telegram-action-form"
+                    >
+                        {% csrf_token %}
+                        <button
+                            type="submit"
+                            class="btn-secondary btn-resend"
+                        >
+                            Resend Code
+                        </button>
+                    </form>
+
+                    <form
+                        method="post"
+                        action="{% url 'telegram_cancel' %}"
+                        class="telegram-action-form"
+                    >
+                        {% csrf_token %}
+                        <button
+                            type="submit"
+                            class="btn-secondary"
+                        >
+                            Cancel
+                        </button>
+                    </form>
+
+                </div>
 
 
             {% else %}
