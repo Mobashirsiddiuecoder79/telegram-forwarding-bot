@@ -384,7 +384,7 @@ def telegram_verify_code(request):
         "Telegram account connected successfully.",
     )
 
-    return redirect("telegram_connection")
+    return redirect("channel_management")
 
 
 @login_required
@@ -445,7 +445,7 @@ def telegram_verify_2fa(request):
         "Telegram account connected successfully.",
     )
 
-    return redirect("telegram_connection")
+    return redirect("channel_management")
 
 
 def save_telegram_connection(request, phone, result):

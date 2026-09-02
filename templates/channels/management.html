@@ -655,6 +655,38 @@
                 <div class="pair-list">
 
                     {% for pair in channel_pairs %}
+    <form method="post" class="forwarding-rules-form">
+        {% csrf_token %}
+        <input type="hidden" name="rule_pair_id" value="{{ pair.id }}">
+
+        <h3>Advanced Forwarding Rules</h3>
+
+        {{ pair.forwarding_rule_form.enabled }}
+        {{ pair.forwarding_rule_form.enabled.label_tag }}
+
+        {{ pair.forwarding_rule_form.keywords.label_tag }}
+        {{ pair.forwarding_rule_form.keywords }}
+
+        {{ pair.forwarding_rule_form.blocked_keywords.label_tag }}
+        {{ pair.forwarding_rule_form.blocked_keywords }}
+
+        <p>Content Types</p>
+        {{ pair.forwarding_rule_form.allow_text }} Text
+        {{ pair.forwarding_rule_form.allow_photos }} Photos
+        {{ pair.forwarding_rule_form.allow_videos }} Videos
+        {{ pair.forwarding_rule_form.allow_documents }} Documents
+        {{ pair.forwarding_rule_form.allow_audio }} Audio
+
+        <p>Message Types</p>
+        {{ pair.forwarding_rule_form.allow_normal }} Normal messages
+        {{ pair.forwarding_rule_form.allow_forwarded }} Forwarded messages
+
+        {{ pair.forwarding_rule_form.filter_captions }} Apply keyword filters to captions
+
+        <button type="submit">Save Forwarding Rules</button>
+    </form>
+
+
 
                         <div class="pair">
 

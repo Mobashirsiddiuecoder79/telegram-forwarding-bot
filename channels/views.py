@@ -5,12 +5,12 @@ from django.shortcuts import redirect, render
 
 from accounts.models import TelegramConnection
 
-from .models import ChannelPair
+from .models import ChannelPair, ForwardingRule
+from .forms import ForwardingRuleForm
 from forwarding.services import (
     check_user_channel_write_access,
     get_user_telegram_channels,
 )
-from licensing.services import get_active_subscription
 from licensing.services import get_active_subscription
 
 
@@ -31,6 +31,37 @@ def channel_management(request):
         return redirect("telegram_connection")
 
     if request.method == "POST":
+        rule_pair_id = request.POST.get("rule_pair_id")
+
+        if rule_pair_id:
+            pair = ChannelPair.objects.filter(
+                id=rule_pair_id,
+                user=request.user,
+            ).first()
+
+            if not pair:
+                messages.error(request, "Invalid channel pair.")
+                return redirect("channel_management")
+
+            rule, _ = ForwardingRule.objects.get_or_create(
+                channel_pair=pair
+            )
+            form = ForwardingRuleForm(request.POST, instance=rule)
+
+            if form.is_valid():
+                form.save()
+                messages.success(
+                    request,
+                    "Forwarding rules updated successfully.",
+                )
+            else:
+                messages.error(
+                    request,
+                    "Please correct the forwarding rule settings.",
+                )
+
+            return redirect("channel_management")
+
         source_chat_id = request.POST.get("source_chat_id", "").strip()
         destination_chat_id = request.POST.get("destination_chat_id", "").strip()
         source_name = request.POST.get("source_name", "").strip()
@@ -78,6 +109,15 @@ def channel_management(request):
     channel_pairs = ChannelPair.objects.filter(
         user=request.user
     ).order_by("-created_at")
+
+    # Load forwarding rules for each channel pair.
+    for pair in channel_pairs:
+        rule, _ = ForwardingRule.objects.get_or_create(
+            channel_pair=pair
+        )
+        pair.forwarding_rule_form = ForwardingRuleForm(
+            instance=rule
+        )
 
     telegram_result = asyncio.run(
         get_user_telegram_channels(request.user)

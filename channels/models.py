@@ -34,3 +34,37 @@ class ChannelPair(models.Model):
 
     def __str__(self):
         return f"{self.source_chat_id} → {self.destination_chat_id}"
+
+
+class ForwardingRule(models.Model):
+    channel_pair = models.OneToOneField(
+        ChannelPair,
+        on_delete=models.CASCADE,
+        related_name='forwarding_rule',
+    )
+
+    enabled = models.BooleanField(default=False)
+
+    # Keyword filtering
+    keywords = models.TextField(blank=True)
+    blocked_keywords = models.TextField(blank=True)
+
+    # Content filtering
+    allow_text = models.BooleanField(default=True)
+    allow_photos = models.BooleanField(default=True)
+    allow_videos = models.BooleanField(default=True)
+    allow_documents = models.BooleanField(default=True)
+    allow_audio = models.BooleanField(default=True)
+
+    # Message filtering
+    allow_forwarded = models.BooleanField(default=True)
+    allow_normal = models.BooleanField(default=True)
+
+    # Apply keyword rules to captions as well as text
+    filter_captions = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'Rules for {self.channel_pair}'
