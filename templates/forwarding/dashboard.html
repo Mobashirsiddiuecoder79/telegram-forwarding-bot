@@ -297,7 +297,7 @@
         }
 
     </style>
-<style>.pair-limit-form{grid-column:1/-1;margin-top:14px;padding:14px 16px;border:1px solid #e5e7eb;border-radius:12px;background:#f8fafc}.pair-limit-label{margin-bottom:8px;font-size:13px;font-weight:700;color:#374151}.pair-limit-row{display:flex;gap:8px;align-items:center}.pair-limit-input{width:120px;padding:9px 11px;border:1px solid #d1d5db;border-radius:8px;background:#fff;font-size:14px}.pair-limit-input:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1)}.pair-limit-button{padding:9px 16px;border:0;border-radius:8px;background:#2563eb;color:#fff;font-size:13px;font-weight:700;cursor:pointer}.pair-limit-button:hover{background:#1d4ed8}.pair-limit-help{margin-top:6px;font-size:12px;color:#6b7280}@media(max-width:700px){.pair-limit-row{width:100%}.pair-limit-input{flex:1}.pair-limit-button{padding-left:20px;padding-right:20px}}</style><style>.pair-limit-form{grid-column:1/-1;margin-top:14px;padding:14px 16px;border:1px solid #e5e7eb;border-radius:12px;background:#f8fafc}.pair-limit-label{margin-bottom:8px;font-size:13px;font-weight:700;color:#374151}.pair-limit-row{display:flex;gap:8px;align-items:center}.pair-limit-input{width:120px;padding:9px 11px;border:1px solid #d1d5db;border-radius:8px;background:#fff;font-size:14px}.pair-limit-input:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1)}.pair-limit-button{padding:9px 16px;border:0;border-radius:8px;background:#2563eb;color:#fff;font-size:13px;font-weight:700;cursor:pointer}.pair-limit-button:hover{background:#1d4ed8}.pair-limit-help{margin-top:6px;font-size:12px;color:#6b7280}@media(max-width:700px){.pair-limit-row{width:100%}.pair-limit-input{flex:1}.pair-limit-button{padding-left:20px;padding-right:20px}}</style></head>
+<style>.pair-limit-form{grid-column:1/-1;margin-top:14px;padding:14px 16px;border:1px solid #e5e7eb;border-radius:12px;background:#f8fafc}.pair-limit-label{margin-bottom:8px;font-size:13px;font-weight:700;color:#374151}.pair-limit-row{display:flex;gap:8px;align-items:center}.pair-limit-input{width:120px;padding:9px 11px;border:1px solid #d1d5db;border-radius:8px;background:#fff;font-size:14px}.pair-limit-input:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1)}.pair-limit-button{padding:9px 16px;border:0;border-radius:8px;background:#2563eb;color:#fff;font-size:13px;font-weight:700;cursor:pointer}.pair-limit-button:hover{background:#1d4ed8}.pair-limit-help{margin-top:6px;font-size:12px;color:#6b7280}@media(max-width:700px){.pair-limit-row{width:100%}.pair-limit-input{flex:1}.pair-limit-button{padding-left:20px;padding-right:20px}}</style><style>.pair-limit-form{grid-column:1/-1;margin-top:14px;padding:14px 16px;border:1px solid #e5e7eb;border-radius:12px;background:#f8fafc}.pair-limit-label{margin-bottom:8px;font-size:13px;font-weight:700;color:#374151}.pair-limit-row{display:flex;gap:8px;align-items:center}.pair-limit-input{width:120px;padding:9px 11px;border:1px solid #d1d5db;border-radius:8px;background:#fff;font-size:14px}.pair-limit-input:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1)}.pair-limit-button{padding:9px 16px;border:0;border-radius:8px;background:#2563eb;color:#fff;font-size:13px;font-weight:700;cursor:pointer}.pair-limit-button:hover{background:#1d4ed8}.pair-limit-help{margin-top:6px;font-size:12px;color:#6b7280}@media(max-width:700px){.pair-limit-row{width:100%}.pair-limit-input{flex:1}.pair-limit-button{padding-left:20px;padding-right:20px}}</style><style>.forwarding-limit-info{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border:1px solid #e5e7eb;border-radius:10px;background:#f8fafc;color:#4b5563;font-size:14px}.forwarding-limit-info strong{font-size:16px;color:#111827}</style><style>.forwarding-limit-info{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border:1px solid #e5e7eb;border-radius:10px;background:#f8fafc;color:#4b5563;font-size:14px}.forwarding-limit-info strong{font-size:16px;color:#111827}</style></head>
 
 <body>
 
@@ -428,44 +428,11 @@
                         {% csrf_token %}
 
                         <div style="margin-bottom: 12px;">
-                            <label
-                                for="forward-count"
-                                style="display:block; margin-bottom:6px;"
-                            >
-                                Messages to forward
-                            </label>
-
-                            <input
-                                id="forward-count"
-                                type="number"
-                                name="forward_count"
-                                min="1"
-                                max="{{ quota.remaining }}"
-                                value="{% if quota.remaining %}1{% else %}0{% endif %}"
-                                required
-                                {% if not connection or not quota.remaining %}
-                                    disabled
-                                {% endif %}
-                                style="width:100%; padding:10px;"
-                            />
-
-                            <small
-                                style="display:block; margin-top:6px;"
-                            >
-                                Remaining quota: {{ quota.remaining }}
-                            </small>
+                            <div class="forwarding-limit-info">
+                                <span>Daily quota remaining</span>
+                                <strong>{{ quota.remaining }}</strong>
+                            </div>
                         </div>
-
-                        <button
-                            type="submit"
-                            class="run-button"
-                            {% if not connection or not quota.remaining %}
-                                disabled
-                            {% endif %}
-                        >
-                            Run Forwarding Now
-                        </button>
-                    </form>
 
                     <form
                         method="post"

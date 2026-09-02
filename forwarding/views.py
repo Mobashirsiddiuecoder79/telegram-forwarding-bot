@@ -164,36 +164,16 @@ def start_forwarding(request):
     if request.method != "POST":
         return redirect("forwarding_dashboard")
 
-    try:
-        requested_count = int(
-            request.POST.get("forward_count", "1")
-        )
-    except (TypeError, ValueError):
-        messages.error(
-            request,
-            "Please enter a valid number of messages.",
-        )
-        return redirect("forwarding_dashboard")
-
-    if requested_count < 1:
-        messages.error(
-            request,
-            "Please enter at least 1 message.",
-        )
-        return redirect("forwarding_dashboard")
-
     quota = get_forwarding_quota(request.user)
 
-    if requested_count > quota["remaining"]:
+    if quota["remaining"] <= 0:
         messages.error(
             request,
-            (
-                f"You requested {requested_count} messages, "
-                f"but only {quota['remaining']} messages remain "
-                "in your forwarding quota."
-            ),
+            "Your forwarding quota has been exhausted.",
         )
         return redirect("forwarding_dashboard")
+
+    requested_count = quota["remaining"]
 
     connection = TelegramConnection.objects.filter(
         user=request.user,
