@@ -1,15 +1,17 @@
 import asyncio
+import time
 from datetime import datetime, timedelta
 
 from telethon.tl.patched import Message
 from telethon.errors import FloodWaitError
 from asgiref.sync import sync_to_async
 from django.core.cache import cache
+from django.utils import timezone
 
 from accounts.models import TelegramConnection
 from accounts.services.telegram_client import get_telegram_client
 from channels.models import ChannelPair
-from forwarding.models import ForwardedMessage
+from forwarding.models import ForwardedMessage, ForwardingAttempt
 from licensing.services import consume_forward_quota
 
 
@@ -130,6 +132,21 @@ async def forward_user_channels(user, max_messages=None):
                     )
                     break
 
+                attempt_started = time.perf_counter()
+
+                create_attempt = sync_to_async(
+                    lambda: ForwardingAttempt.objects.create(
+                        user=user,
+                        source_chat_id=pair.source_chat_id,
+                        destination_chat_id=pair.destination_chat_id,
+                        source_message_id=message.id,
+                        status="pending",
+                    ),
+                    thread_sensitive=True,
+                )
+
+                attempt = await create_attempt()
+
                 try:
                     while True:
                         try:
@@ -176,7 +193,7 @@ async def forward_user_channels(user, max_messages=None):
                                 await asyncio.sleep(sleep_for)
                                 remaining_wait -= sleep_for
 
-                except Exception:
+                except Exception as exc:
                     from licensing.services import release_forward_quota
 
                     await sync_to_async(
@@ -184,7 +201,44 @@ async def forward_user_channels(user, max_messages=None):
                         thread_sensitive=True,
                     )(user, 1)
 
+                    latency_ms = int(
+                        (time.perf_counter() - attempt_started) * 1000
+                    )
+
+                    def mark_failed():
+                        ForwardingAttempt.objects.filter(
+                            id=attempt.id
+                        ).update(
+                            status="failed",
+                            error_message=str(exc),
+                            latency_ms=latency_ms,
+                            completed_at=timezone.now(),
+                        )
+
+                    await sync_to_async(
+                        mark_failed,
+                        thread_sensitive=True,
+                    )()
+
                     raise
+
+                latency_ms = int(
+                    (time.perf_counter() - attempt_started) * 1000
+                )
+
+                def mark_success():
+                    ForwardingAttempt.objects.filter(
+                        id=attempt.id
+                    ).update(
+                        status="success",
+                        latency_ms=latency_ms,
+                        completed_at=timezone.now(),
+                    )
+
+                await sync_to_async(
+                    mark_success,
+                    thread_sensitive=True,
+                )()
 
                 # The Telegram message was successfully forwarded.
                 # Save it BEFORE checking STOP so it can never be

@@ -5,6 +5,11 @@ from . import views
 
 urlpatterns = [
     path(
+        "analytics/",
+        views.analytics_dashboard,
+        name="analytics_dashboard",
+    ),
+    path(
         "admin-monitoring/",
         views.admin_monitoring_dashboard,
         name="admin_monitoring_dashboard",

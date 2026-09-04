@@ -35,3 +35,55 @@ class ForwardedMessage(models.Model):
             f"{self.source_chat_id}:{self.source_message_id} -> "
             f"{self.destination_chat_id}"
         )
+
+
+class ForwardingAttempt(models.Model):
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("success", "Success"),
+        ("failed", "Failed"),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="forwarding_attempts",
+    )
+
+    source_chat_id = models.BigIntegerField()
+    destination_chat_id = models.BigIntegerField()
+    source_message_id = models.BigIntegerField()
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="pending",
+    )
+
+    error_message = models.TextField(blank=True)
+
+    latency_ms = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["user", "status"]),
+            models.Index(fields=["created_at"]),
+            models.Index(fields=["source_chat_id"]),
+            models.Index(fields=["destination_chat_id"]),
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.user} | "
+            f"{self.source_chat_id}:{self.source_message_id} | "
+            f"{self.status}"
+        )
