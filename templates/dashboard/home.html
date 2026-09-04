@@ -191,9 +191,18 @@
                 </a>
 
 
-                <a href="{% url 'subscription_plans' %}">
-                    Subscription
-                </a>
+                {% if user.is_staff %}
+                    <a href="{% url 'analytics_dashboard' %}">
+                        Analytics
+                    </a>
+                    <a href="{% url 'channel_management' %}">
+                        Channels
+                    </a>
+                {% else %}
+                    <a href="{% url 'subscription_plans' %}">
+                        Subscription
+                    </a>
+                {% endif %}
 
                 {% if user.is_staff %}
                     <a href="/admin/">

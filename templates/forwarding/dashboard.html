@@ -431,13 +431,14 @@
                             <button
                                 type="submit"
                                 class="run-button"
-                                {% if not connection or not quota.remaining %}
+                                {% if not connection or not user.is_superuser and quota.remaining == 0 %}
                                     disabled
                                 {% endif %}
                             >
                                 Start Forwarding
                             </button>
                         </div>
+                    </form>
 
                     <form
                         method="post"
@@ -522,7 +523,9 @@
 
                     <div class="quota-top">
                         <span class="quota-title">
-                            {% if quota.type == "paid" %}
+                            {% if user.is_superuser %}
+                                Business quota
+                            {% elif quota.type == "paid" %}
                                 Daily quota
                             {% else %}
                                 Lifetime quota
@@ -530,19 +533,32 @@
                         </span>
 
                         <span class="quota-value">
-                            {{ quota.used }} / {{ quota.limit }}
+                            {% if user.is_superuser %}
+                                Unlimited
+                            {% else %}
+                                {{ quota.used }} / {{ quota.limit }}
+                            {% endif %}
                         </span>
                     </div>
 
                     <div class="bar">
-                        <div
-                            class="bar-inner"
-                            style="width: {% widthratio quota.used quota.limit 100 %}%"
-                        ></div>
+                        {% if user.is_superuser %}
+                            <div
+                                class="bar-inner"
+                                style="width: 100%;"
+                            ></div>
+                        {% elif quota.limit %}
+                            <div
+                                class="bar-inner"
+                                style="width: {% widthratio quota.used quota.limit 100 %}%"
+                            ></div>
+                        {% endif %}
                     </div>
 
                     <div class="quota-note">
-                        {% if quota.type == "paid" %}
+                        {% if user.is_superuser %}
+                            Unlimited messages available.
+                        {% elif quota.type == "paid" %}
                             {{ quota.remaining }} messages remaining today.
                         {% else %}
                             {{ quota.remaining }} lifetime messages remaining.

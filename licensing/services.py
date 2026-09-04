@@ -36,6 +36,17 @@ def get_forwarding_quota(user):
         Plan.max_daily_forwards per day.
     """
 
+    # Admin/Superuser has unlimited forwarding.
+    # Staff and normal users follow the existing quota rules.
+    if user.is_superuser:
+        return {
+            "type": "paid",
+            "limit": None,
+            "used": 0,
+            "remaining": None,
+            "plan": "Business",
+        }
+
     subscription = get_active_subscription(user)
 
     usage, _ = ForwardingUsage.objects.get_or_create(
@@ -117,6 +128,19 @@ def consume_forward_quota(user, amount=1):
         usage.usage_date = today
         usage.daily_count = 0
 
+    # Admin/Superuser has unlimited forwarding.
+    # Do not apply Free/Paid quota limits to admins.
+    if user.is_superuser:
+        usage.save(
+            update_fields=[
+                "usage_date",
+                "daily_count",
+                "free_lifetime_count",
+                "updated_at",
+            ]
+        )
+        return True
+
     subscription = get_active_subscription(user)
 
     if subscription is None:
@@ -167,6 +191,11 @@ def release_forward_quota(user, amount=1):
         .select_for_update()
         .get(user=user)
     )
+
+    # Admin/Superuser does not consume quota,
+    # so there is nothing to release.
+    if user.is_superuser:
+        return
 
     subscription = get_active_subscription(user)
 

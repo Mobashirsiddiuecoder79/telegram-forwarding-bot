@@ -1,9 +1,14 @@
 import asyncio
 
+from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.shortcuts import redirect, render
+from django.db.models import Avg, Count
+from django.db.models.functions import TruncDate
+from django.utils import timezone
+from datetime import timedelta
 
 from accounts.models import TelegramConnection
 from channels.models import ChannelPair
@@ -14,7 +19,7 @@ from licensing.services import (
 
 from licensing.services import get_active_subscription, get_forwarding_quota
 
-from forwarding.models import ForwardedMessage
+from forwarding.models import ForwardedMessage, ForwardingAttempt
 from .services import (
     check_user_channel_access,
     forward_user_channels,
@@ -95,7 +100,11 @@ def forwarding_dashboard(request):
     # Keep pair limits within the user's currently remaining quota.
     remaining_quota = quota["remaining"]
     for pair in pairs:
-        if pair.message_limit > 0 and pair.message_limit > remaining_quota:
+        if (
+            remaining_quota is not None
+            and pair.message_limit > 0
+            and pair.message_limit > remaining_quota
+        ):
             pair.message_limit = remaining_quota
             pair.save(update_fields=["message_limit"])
 
@@ -121,8 +130,13 @@ def forwarding_dashboard(request):
                 messages.error(request, "Message limit cannot be negative.")
                 return redirect("forwarding_dashboard")
 
-            # A pair limit cannot exceed the user's remaining daily quota.
-            if message_limit > 0 and message_limit > quota["remaining"]:
+            # A pair limit cannot exceed the user's remaining quota.
+            # Admin/Superuser has unlimited quota, so no cap is applied.
+            if (
+                quota["remaining"] is not None
+                and message_limit > 0
+                and message_limit > quota["remaining"]
+            ):
                 message_limit = quota["remaining"]
                 messages.info(
                     request,
@@ -188,6 +202,294 @@ def admin_monitoring_dashboard(request):
 
 
 @login_required
+def analytics_dashboard(request):
+    if not request.user.is_staff:
+        return redirect("forwarding_dashboard")
+
+    selected_user_id = request.GET.get("user", "").strip()
+
+    selected_user = None
+    analytics_user = None
+
+    if selected_user_id:
+        try:
+            analytics_user = User.objects.get(
+                id=int(selected_user_id),
+                is_active=True,
+            )
+            selected_user = analytics_user
+        except (User.DoesNotExist, ValueError):
+            selected_user_id = ""
+
+    attempts = ForwardingAttempt.objects.all()
+    forwarded_messages = ForwardedMessage.objects.all()
+    channel_pairs = ChannelPair.objects.all()
+
+    if analytics_user:
+        attempts = attempts.filter(user=analytics_user)
+        forwarded_messages = forwarded_messages.filter(user=analytics_user)
+        channel_pairs = channel_pairs.filter(user=analytics_user)
+
+    total_forwarded = forwarded_messages.count()
+
+    successful_forwards = attempts.filter(
+        status="success"
+    ).count()
+
+    failed_forwards = attempts.filter(
+        status="failed"
+    ).count()
+
+    total_attempts = successful_forwards + failed_forwards
+
+    success_rate = (
+        (successful_forwards / total_attempts) * 100
+        if total_attempts
+        else 100
+    )
+
+    avg_latency = attempts.filter(
+        status="success",
+        latency_ms__isnull=False,
+    ).aggregate(avg=Avg("latency_ms"))["avg"]
+
+    active_pairs = channel_pairs.filter(
+        is_active=True
+    ).count()
+
+    today = timezone.localdate()
+    thirty_days_ago = today - timedelta(days=29)
+
+    # -----------------------------------------------------
+    # DAILY ACTIVITY — LAST 30 DAYS
+    # -----------------------------------------------------
+
+    daily_forwarded_queryset = (
+        forwarded_messages
+        .filter(forwarded_at__date__gte=thirty_days_ago)
+        .annotate(day=TruncDate("forwarded_at"))
+        .values("day")
+        .annotate(count=Count("id"))
+        .order_by("day")
+    )
+
+    daily_failed_queryset = (
+        attempts
+        .filter(
+            status="failed",
+            created_at__date__gte=thirty_days_ago,
+        )
+        .annotate(day=TruncDate("created_at"))
+        .values("day")
+        .annotate(count=Count("id"))
+    )
+
+    forwarded_map = {
+        item["day"]: item["count"]
+        for item in daily_forwarded_queryset
+    }
+
+    failed_map = {
+        item["day"]: item["count"]
+        for item in daily_failed_queryset
+    }
+
+    max_activity = 1
+
+    for value in forwarded_map.values():
+        max_activity = max(max_activity, value)
+
+    for value in failed_map.values():
+        max_activity = max(max_activity, value)
+
+    daily_activity = []
+
+    for i in range(30):
+        day = thirty_days_ago + timedelta(days=i)
+
+        forwarded = forwarded_map.get(day, 0)
+        failed = failed_map.get(day, 0)
+
+        total = forwarded + failed
+
+        height = (
+            (total / max_activity) * 100
+            if total
+            else 2
+        )
+
+        daily_activity.append({
+            "label": day.strftime("%d %b %Y"),
+            "short": day.strftime("%d %b"),
+            "forwarded": forwarded,
+            "failed": failed,
+            "height": round(height, 2),
+        })
+
+    # -----------------------------------------------------
+    # PERIOD TOTALS
+    # -----------------------------------------------------
+
+    daily_forwarded = forwarded_messages.filter(
+        forwarded_at__date=today
+    ).count()
+
+    weekly_forwarded = forwarded_messages.filter(
+        forwarded_at__date__gte=today - timedelta(days=6)
+    ).count()
+
+    monthly_forwarded = forwarded_messages.filter(
+        forwarded_at__date__gte=thirty_days_ago
+    ).count()
+
+    # -----------------------------------------------------
+    # SOURCE CHANNELS
+    # -----------------------------------------------------
+
+    source_stats = list(
+        forwarded_messages
+        .values("source_chat_id")
+        .annotate(count=Count("id"))
+        .order_by("-count")[:10]
+    )
+
+    destination_stats = list(
+        forwarded_messages
+        .values("destination_chat_id")
+        .annotate(count=Count("id"))
+        .order_by("-count")[:10]
+    )
+
+    # Resolve channel names from ChannelPair because
+    # ForwardedMessage stores only the channel IDs.
+    pair_lookup = {}
+
+    for pair in channel_pairs:
+        pair_lookup[
+            (pair.source_chat_id, pair.destination_chat_id)
+        ] = pair
+
+    source_names = {}
+
+    destination_names = {}
+
+    for pair in channel_pairs:
+        source_names[pair.source_chat_id] = (
+            pair.source_name
+            or str(pair.source_chat_id)
+        )
+
+        destination_names[pair.destination_chat_id] = (
+            pair.destination_name
+            or str(pair.destination_chat_id)
+        )
+
+    for item in source_stats:
+        chat_id = item["source_chat_id"]
+
+        item["name"] = source_names.get(
+            chat_id,
+            str(chat_id),
+        )
+
+        item["chat_id"] = chat_id
+
+    for item in destination_stats:
+        chat_id = item["destination_chat_id"]
+
+        item["name"] = destination_names.get(
+            chat_id,
+            str(chat_id),
+        )
+
+    # -----------------------------------------------------
+    # DESTINATION CHANNELS
+    # -----------------------------------------------------
+
+    # -----------------------------------------------------
+    # ERRORS
+    # -----------------------------------------------------
+
+    error_stats = (
+        attempts
+        .filter(status="failed")
+        .exclude(error_message="")
+        .values("error_message")
+        .annotate(count=Count("id"))
+        .order_by("-count")[:10]
+    )
+
+    # -----------------------------------------------------
+    # MOST ACTIVE SOURCE / DESTINATION
+    # -----------------------------------------------------
+
+    most_active_source = (
+        source_stats[0]
+        if source_stats
+        else None
+    )
+
+    most_active_destination = (
+        destination_stats[0]
+        if destination_stats
+        else None
+    )
+
+    # -----------------------------------------------------
+    # USERS FOR ADMIN SELECTOR
+    # -----------------------------------------------------
+
+    users = (
+        User.objects
+        .filter(is_active=True)
+        .order_by("username")
+    )
+
+    context = {
+        # User selector
+        "users": users,
+        "selected_user": selected_user,
+        "selected_user_id": (
+            str(selected_user.id)
+            if selected_user
+            else ""
+        ),
+
+        # Main metrics
+        "total_forwarded": total_forwarded,
+        "successful_forwards": successful_forwards,
+        "failed_forwards": failed_forwards,
+        "success_rate": round(success_rate, 2),
+
+        # Performance
+        "active_pairs": active_pairs,
+        "avg_latency": (
+            round(avg_latency, 2)
+            if avg_latency is not None
+            else 0
+        ),
+
+        # Activity
+        "daily_forwarded": daily_forwarded,
+        "weekly_forwarded": weekly_forwarded,
+        "monthly_forwarded": monthly_forwarded,
+        "daily_activity": daily_activity,
+
+        # Channels
+        "source_stats": source_stats,
+        "destination_stats": destination_stats,
+        "most_active_source": most_active_source,
+        "most_active_destination": most_active_destination,
+
+        # Errors
+        "error_stats": error_stats,
+    }
+
+    return render(
+        request,
+        "forwarding/analytics.html",
+        context,
+    )
 def stop_forwarding(request):
     if request.method != "POST":
         return redirect("forwarding_dashboard")
@@ -224,13 +526,20 @@ def start_forwarding(request):
 
     quota = get_forwarding_quota(request.user)
 
-    if quota["remaining"] <= 0:
+    # Admin/Superuser has unlimited forwarding.
+    # Staff and normal users keep their existing quota rules.
+    if (
+        not request.user.is_superuser
+        and quota["remaining"] is not None
+        and quota["remaining"] <= 0
+    ):
         messages.error(
             request,
             "Your forwarding quota has been exhausted.",
         )
         return redirect("forwarding_dashboard")
 
+    # None means no message-count limit for Admin/Superuser.
     requested_count = quota["remaining"]
 
     connection = TelegramConnection.objects.filter(
@@ -259,7 +568,11 @@ def start_forwarding(request):
 
     subscription = get_active_subscription(request.user)
 
-    if subscription:
+    if request.user.is_superuser:
+        # Admin/Superuser gets unlimited Business-level channel access.
+        max_sources = None
+        max_destinations = None
+    elif subscription:
         max_sources = subscription.plan.max_sources
         max_destinations = subscription.plan.max_destinations
     else:
@@ -280,7 +593,7 @@ def start_forwarding(request):
         .count()
     )
 
-    if source_count > max_sources:
+    if max_sources is not None and source_count > max_sources:
         messages.error(
             request,
             (
@@ -290,7 +603,7 @@ def start_forwarding(request):
         )
         return redirect("forwarding_dashboard")
 
-    if destination_count > max_destinations:
+    if max_destinations is not None and destination_count > max_destinations:
         messages.error(
             request,
             (
